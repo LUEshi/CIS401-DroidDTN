@@ -38,4 +38,10 @@
     <string name="secure_connect">Connect a device - Secure</string>
     <string name="insecure_connect">Connect a device - Insecure</string>
     <string name="discoverable">Make discoverable</string>
+    
+    <!-- misc -->
+    <string name="select_post">Select a Post</string>
+    <string name="new_post">Add a Post</string>
+    <string name="settings">Settings</string>
+    
 </resources>
