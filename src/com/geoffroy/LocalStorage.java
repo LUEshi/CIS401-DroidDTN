@@ -69,7 +69,7 @@ public class LocalStorage {
 		@Override
       	public void onCreate(SQLiteDatabase db) {
 			db.execSQL("CREATE TABLE " + TABLE_NAME + " (" +
-					"ID INTEGER, " + 
+					"localID INTEGER, " + 
 	    			"created INTEGER, " +
 	    			"author TEXT, " +
 	    			"title TEXT, " +

@@ -17,7 +17,7 @@ public class DataPacket {
 	/*
 	 * Default constructor
 	 */
-	DataPacket(String author, String title, String content) {
+	public DataPacket(String author, String title, String content) {
 		this.localID = 0;
 		this.created = System.currentTimeMillis();
 		this.author = author;
@@ -28,7 +28,7 @@ public class DataPacket {
 	/*
 	 * Constructor used when receiving a post from another device
 	 */
-	DataPacket(String jsonString) {
+	public DataPacket(String jsonString) {
 		try {
 			JSONObject json = new JSONObject(jsonString);
 			this.created = json.getLong("created");
@@ -93,7 +93,7 @@ public class DataPacket {
 				post = new DataPacket(mCursor.getString(2), mCursor.getString(3), mCursor.getString(4));
 				post.setLocalID(mCursor.getInt(0));
 				post.setCreated(mCursor.getInt(1));
-				
+				posts.add(post);
 			} while (mCursor.moveToNext());
 		}
 		
