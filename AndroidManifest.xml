@@ -34,5 +34,7 @@
         <activity android:name=".DeviceListActivity"
                   android:label="@string/select_device"
                   android:configChanges="orientation|keyboardHidden" />
+        <activity android:name="MainAppScreenActivity"></activity>
+        <activity android:name="ViewPostActivity"></activity>
     </application>
 </manifest>
