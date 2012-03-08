@@ -21,6 +21,14 @@ public class ViewPostActivity extends Activity {
 		author = bun.getString("author");
 		title = bun.getString("title");
 		content = bun.getString("content");
+		
+		System.out.println("RESULTS: " + localID + " " + created + " " + author + " " + title + " " + content);
 	}
+	
+	public long getLocalID() { return localID; }
+	public long getCreated() { return created; }
+	public String getAuthor() { return author; }
+	public String getPostTitle() { return title; }
+	public String getContent() { return content; }
 
 }
