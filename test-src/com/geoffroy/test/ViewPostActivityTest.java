@@ -14,6 +14,7 @@ public class ViewPostActivityTest extends
 	
 	private MainAppScreenActivity mActivity;
 	private ViewPostActivity vActivity;
+	DataPacket dp = new DataPacket("author", "title", "content");
 	
 	public ViewPostActivityTest() {
 		super("com.geoffroy", ViewPostActivity.class);
@@ -27,8 +28,7 @@ public class ViewPostActivityTest extends
 	}
 	
 	public void testClick(){
-		DataPacket dp = new DataPacket("author", "title", "content");
-		mActivity.click(dp);
+		mActivity.clickOnPost(dp);
 		assertEquals(dp.getLocalID(), vActivity.getLocalID());
 		assertEquals(dp.getCreated(), vActivity.getCreated());
 		assertEquals(dp.getAuthor(), vActivity.getAuthor());

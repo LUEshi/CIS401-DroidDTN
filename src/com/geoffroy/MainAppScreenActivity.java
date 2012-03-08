@@ -10,6 +10,8 @@ public class MainAppScreenActivity extends Activity {
 	/* Database helper class */
     LocalStorage db;
     ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
+    
+    int NEW_POST_REQUEST = 0;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -20,14 +22,32 @@ public class MainAppScreenActivity extends Activity {
         posts = DataPacket.loadAll(db);
 	}
 	
+	@Override
+	// Called when NewPostActivity returns
+	// Creates a new DataPacket with the given information, persists the DP, and updates posts
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == RESULT_OK){
+			Bundle bun = data.getExtras();
+			String author = bun.getString("author");
+			String title = bun.getString("title");
+			String content = bun.getString("content");
+			
+			DataPacket dp = new DataPacket(author, title, content);
+			dp.persist(db);
+			update();
+	    }
+		else{
+			System.out.println("RESULT FAILED");
+	    }
+	}	
+	
 	// Reload posts
-	public void update(){
-		posts = DataPacket.loadAll(db);
-	}
+	public void update(){ posts = DataPacket.loadAll(db); }
 	
 	// To be called when a packet is clicked.
 	// Creates a new ViewPostActivity with dp's fields as parameters (might be clunky?)
-	public void click(DataPacket dp){
+	public void clickOnPost(DataPacket dp){
 		Intent intent = new Intent();
 		Bundle bun = new Bundle();
 
@@ -42,13 +62,16 @@ public class MainAppScreenActivity extends Activity {
 		startActivity(intent);
 	}
 	
-	// GETTERS
-	public ArrayList<DataPacket> getPosts(){
-		return posts;
+	// To be called when New Post is clicked.
+	// Creates a new NewPostActivity and requests result.
+	public void newPost(){
+		Intent i = new Intent(this, NewPostActivity.class);       
+        startActivityForResult(i, NEW_POST_REQUEST);
 	}
 	
-	public LocalStorage getDB(){
-		return db;
-	}
+	
+	// GETTERS
+	public ArrayList<DataPacket> getPosts(){  return posts; }
+	public LocalStorage getDB(){ return db; }
 
 }
