@@ -36,5 +36,6 @@
                   android:configChanges="orientation|keyboardHidden" />
         <activity android:name="MainAppScreenActivity"></activity>
         <activity android:name="ViewPostActivity"></activity>
+        <activity android:name="NewPostActivity"></activity>
     </application>
 </manifest>
