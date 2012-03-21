@@ -45,4 +45,8 @@
     <string name="settings">Settings</string>
     <string name="post_title">Post Title</string>
     
+    <!-- post details -->
+    <string name="message_text">Message: </string>
+    <string name="author">By: </string>
+    
 </resources>

@@ -1,7 +1,10 @@
 package com.geoffroy;
 
+
+import android.widget.TextView;
 import android.app.Activity;
 import android.os.Bundle;
+
 
 public class ViewPostActivity extends Activity {
 	private long localID;
@@ -9,6 +12,8 @@ public class ViewPostActivity extends Activity {
 	private String author;
 	private String title;
 	private String content;
+	
+	private TextView temp;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -21,6 +26,20 @@ public class ViewPostActivity extends Activity {
 		author = bun.getString("author");
 		title = bun.getString("title");
 		content = bun.getString("content");
+		
+		//initialize view
+		setContentView(R.layout.view_post);
+		
+		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_title);
+		temp.setText(title);
+		
+		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_author);
+		temp.setText(author);
+		
+		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_message);
+		temp.setText(content);
+		
+		
 	}
 	
 	public long getLocalID() { return localID; }
