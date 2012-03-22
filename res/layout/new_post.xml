@@ -18,9 +18,9 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-
+
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/newPostTitle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/post_title" >
@@ -60,9 +60,9 @@
             android:text="Button" />
 
     </RelativeLayout>
-
+
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/newMessage"
         android:layout_width="fill_parent"
         android:layout_height="306dp"
         android:inputType="textMultiLine" />
@@ -78,6 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
+            android:onClick="onPublishButtonClick"
             android:text="Publish" />
 
     </RelativeLayout>

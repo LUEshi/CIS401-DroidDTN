@@ -1,5 +1,8 @@
 package com.geoffroy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -54,6 +57,32 @@ public class LocalStorage {
 		}
 		return mCursor;
 	}
+	
+	public Map<String,String> getPostMap(long ID) throws SQLException {
+		Cursor mCursor = db.query(true, TABLE_NAME, 
+				new String[] {"localID", "created", "author", "title", "content"}, 
+				"localID" + "=" + ID, null, null, null, null, null);
+	
+		Map<String,String> post = new HashMap<String,String>();
+		if(mCursor != null)
+		{
+			if(mCursor.moveToFirst())
+			{
+				post.put("localID", new Integer(mCursor.getInt(mCursor.getColumnIndex("localID"))).toString());
+				post.put("created", new Integer(mCursor.getInt(mCursor.getColumnIndex("created"))).toString());
+				post.put("author",mCursor.getString(mCursor.getColumnIndex("author")));
+				post.put("title",mCursor.getString(mCursor.getColumnIndex("title")));
+				post.put("content",mCursor.getString(mCursor.getColumnIndex("content")));
+				return post;
+			}
+			else
+				return null;
+		}
+		else
+			return null;
+	}
+	
+
 	
 	public Cursor getAll() throws SQLException {
 		return db.query(TABLE_NAME, 
