@@ -31,19 +31,8 @@ public class MainAppScreenActivity extends ListActivity {
 	    db = new LocalStorage(this);
         posts = DataPacket.loadAll(db);
         
-        Cursor mCursor = db.getAll();
-        ListAdapter adapter = new SimpleCursorAdapter(this, // Context.
-				android.R.layout.two_line_list_item, // Specify the row template
-				mCursor, // Pass in the cursor to bind to.
-				// Array of cursor columns to bind to.
-				new String[] { "localID",
-						"title" },
-				// Parallel array of which template objects to bind to those
-				// columns.
-				new int[] { android.R.id.text1, android.R.id.text2 });
-
 		// Bind to our new adapter.
-		setListAdapter(adapter);
+        setListAdapter(new DataPacketArrayAdapter(this,posts));
 	}
 	
 	@Override
