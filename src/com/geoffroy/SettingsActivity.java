@@ -23,7 +23,11 @@ public class SettingsActivity extends Activity {
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString("username", username);
 		editor.commit();
-	}	
+	}
+	
+	public void saveAndExit(){
+		finish();
+	}
 	
 	public void setUsername(String username) { this.username = username; }
 	public String getUsername() { return this.username; }
