@@ -68,16 +68,9 @@ public class MainAppScreenActivity extends ListActivity {
 	
 	@Override  
 	protected void onListItemClick(ListView l, View v, int position, long id) {  
-	  Object alertDialog = new AlertDialog.Builder(this).create();  
-	  ((Activity) alertDialog).setTitle("Item Selected");  
-	  ((AlertDialog) alertDialog).setMessage("You just clicked an item position #" + String.valueOf(position));  
-	  ((AlertDialog) alertDialog).setButton("OK",new DialogInterface.OnClickListener(){  
-	    public void onClick(DialogInterface dialog, int which) {  
-	    return;  
-	  } });   
-	  ((Dialog) alertDialog).show();  
-	  
 	  super.onListItemClick(l, v, position, id);  
+	  clickOnPost(posts.get(position));
+	  
 	}  
 	// To be called when a packet is clicked.
 	// Creates a new ViewPostActivity with dp's fields as parameters (might be clunky?)

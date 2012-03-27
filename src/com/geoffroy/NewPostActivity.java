@@ -30,6 +30,10 @@ public class NewPostActivity extends Activity {
 		setPostTitle(titleText.getText().toString());
 		setContent(messageText.getText().toString());
 		
+		//TODO: actual author
+		DataPacket newPost = new DataPacket("PERSON!", title, content);
+		newPost.persist(new LocalStorage(this));
+		
 		Intent i = new Intent();
 		Bundle bun = new Bundle();
 		bun.putString("title", title);
@@ -37,7 +41,7 @@ public class NewPostActivity extends Activity {
 		i.putExtras(bun);
 		
 		//TODO: remove test code
-		Object alertDialog = new AlertDialog.Builder(this).create();  
+/*		Object alertDialog = new AlertDialog.Builder(this).create();  
 //		  ((Activity) alertDialog).setTitle(title);  
 		  ((AlertDialog) alertDialog).setMessage("Message: " + content + "\nPushed to DB");  
 		  ((AlertDialog) alertDialog).setButton("OK",new DialogInterface.OnClickListener(){  
@@ -45,9 +49,9 @@ public class NewPostActivity extends Activity {
 		    return;  
 		  } });   
 		  ((Dialog) alertDialog).show();
-		
+	*/	
 		setResult(RESULT_OK, i);
-		//finish();
+		finish();
 	}
 	
 	public String getPostTitle() {	return title;	}
