@@ -15,7 +15,7 @@ import android.widget.TextView;
 public class MainMenuActivity extends ListActivity {
 	
 	static final String[] APPS = new String[] { "Device List", 
-		"Create Post", "View Post", "View Posts (Broken)"};
+		"Create Post", "View Post", "View Posts (Broken)", "Settings"};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +61,13 @@ public class MainMenuActivity extends ListActivity {
 				{
 
 					Intent i = new Intent(c, MainAppScreenActivity.class);
+					startActivity(i);
+				
+				}
+				else if(clicked.equals(APPS[4]))
+				{
+
+					Intent i = new Intent(c, SettingsActivity.class);
 					startActivity(i);
 				
 				}

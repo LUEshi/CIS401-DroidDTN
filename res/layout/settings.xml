@@ -55,7 +55,7 @@
 	        android:textAppearance="?android:attr/textAppearanceLarge" />
 	
 	    <EditText
-	        android:id="@+id/editText1"
+	        android:id="@+id/editName"
 	        android:layout_width="258dp"
 	        android:layout_height="wrap_content"
 	        android:layout_marginLeft="20dp"
@@ -63,7 +63,7 @@
 	
 	        <requestFocus />
 	    </EditText>
-	
+<!--	
 	    <CheckBox
 	        android:id="@+id/checkBox1"
 	        android:layout_width="wrap_content"
@@ -84,6 +84,13 @@
 	        android:layout_width="256dp"
 	        android:layout_height="wrap_content"
 	        android:layout_marginLeft="20dp" />
-
-	</LinearLayout>
+-->
+	
+<Button 
+	android:text="Save" 
+	android:id="@+id/save_settings" 
+	android:layout_width="fill_parent" 
+	android:layout_height="wrap_content"
+	android:onClick="saveAndExit"></Button>
+</LinearLayout>
 </LinearLayout>
