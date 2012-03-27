@@ -10,9 +10,6 @@ import android.view.View;
 import android.widget.EditText;
 
 public class NewPostActivity extends Activity {
-	private long localID;
-	private long created;
-	private String author;
 	private String title;
 	private String content;
 	
@@ -26,8 +23,6 @@ public class NewPostActivity extends Activity {
 	// Bundles the information and sends it back to MainAppScreenActivity.
 	// To be called by publish button.
 	public void onPublishButtonClick(View v){
-		//TODO: Change author code
-		setAuthor("Super Cool Guy");
 		
 		EditText titleText = (EditText) findViewById(R.id.newPostTitle);
 		EditText messageText = (EditText) findViewById(R.id.newMessage);
@@ -37,7 +32,6 @@ public class NewPostActivity extends Activity {
 		
 		Intent i = new Intent();
 		Bundle bun = new Bundle();
-		bun.putString("author", author);
 		bun.putString("title", title);
 		bun.putString("content", content);
 		i.putExtras(bun);
@@ -45,7 +39,7 @@ public class NewPostActivity extends Activity {
 		//TODO: remove test code
 		Object alertDialog = new AlertDialog.Builder(this).create();  
 //		  ((Activity) alertDialog).setTitle(title);  
-		  ((AlertDialog) alertDialog).setMessage("author:" + author + "\nMessage: " + content + "\nPushed to DB");  
+		  ((AlertDialog) alertDialog).setMessage("Message: " + content + "\nPushed to DB");  
 		  ((AlertDialog) alertDialog).setButton("OK",new DialogInterface.OnClickListener(){  
 		    public void onClick(DialogInterface dialog, int which) {  
 		    return;  
@@ -56,12 +50,6 @@ public class NewPostActivity extends Activity {
 		//finish();
 	}
 	
-	public long getLocalID() {	return localID;	}
-	public void setLocalID(long localID) {	this.localID = localID;	}
-	public long getCreated() {	return created;	}
-	public void setCreated(long created) {	this.created = created;	}
-	public String getAuthor() {	return author;	}
-	public void setAuthor(String author) {	this.author = author;	}
 	public String getPostTitle() {	return title;	}
 	public void setPostTitle(String title) {	this.title = title;	}
 	public String getContent() {	return content;	}

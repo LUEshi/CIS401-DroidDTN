@@ -37,5 +37,6 @@
         <activity android:name="MainAppScreenActivity"></activity>
         <activity android:name="ViewPostActivity"></activity>
         <activity android:name="NewPostActivity"></activity>
+        <activity android:name="SettingsActivity"></activity>
     </application>
 </manifest>

@@ -8,6 +8,7 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
@@ -19,6 +20,9 @@ public class MainAppScreenActivity extends ListActivity {
 	/* Database helper class */
     LocalStorage db;
     ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
+    
+    // Username from settings
+    private String username;
     
     int NEW_POST_REQUEST = 0;
 	
@@ -33,6 +37,10 @@ public class MainAppScreenActivity extends ListActivity {
         
 		// Bind to our new adapter.
         setListAdapter(new DataPacketArrayAdapter(this,posts));
+        
+        // Load settings, if username doesn't exist, load model as default
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        username = settings.getString("username", android.os.Build.MODEL);
 	}
 	
 	@Override
@@ -42,11 +50,10 @@ public class MainAppScreenActivity extends ListActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(resultCode == RESULT_OK){
 			Bundle bun = data.getExtras();
-			String author = bun.getString("author");
 			String title = bun.getString("title");
 			String content = bun.getString("content");
 			
-			DataPacket dp = new DataPacket(author, title, content);
+			DataPacket dp = new DataPacket(username, title, content);
 			dp.persist(db);
 			update();
 	    }
