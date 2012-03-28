@@ -90,6 +90,10 @@ public class LocalStorage {
 				null, null, null, null, null);
 	}
 	
+	public void close() {
+		db.close();
+	}
+	
 	private static class OpenHelper extends SQLiteOpenHelper {
 		OpenHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
