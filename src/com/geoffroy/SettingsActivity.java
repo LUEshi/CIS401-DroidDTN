@@ -9,7 +9,9 @@ import android.view.View;
 import android.widget.EditText;
 
 public class SettingsActivity extends Activity {
-	private String username;
+	
+	public static final String PREFS_NAME = "PrefsFile";
+    private String username;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -18,7 +20,7 @@ public class SettingsActivity extends Activity {
 	    setContentView(R.layout.settings);
 		
         // Load settings, if username doesn't exist, load model as default
-        SharedPreferences settings = getPreferences(0);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         username = settings.getString("username", android.os.Build.MODEL);
         //initialize fields
         EditText t = (EditText)this.findViewById(id.editName);
@@ -29,7 +31,7 @@ public class SettingsActivity extends Activity {
 	@Override
 	protected void onStop(){
 		super.onStop();
-		SharedPreferences settings = getPreferences(0);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
 		//push values here
 		editor.putString("username", username);

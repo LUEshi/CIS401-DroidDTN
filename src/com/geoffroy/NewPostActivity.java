@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 
 public class NewPostActivity extends Activity {
+	public static final String PREFS_NAME = "PrefsFile";
 	private String title;
 	private String content;
 	private String username;
@@ -24,7 +25,7 @@ public class NewPostActivity extends Activity {
 	// Bundles the information and sends it back to MainAppScreenActivity.
 	// To be called by publish button.
 	public void onPublishButtonClick(View v){
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         username = settings.getString("username", android.os.Build.MODEL);
         
 		EditText titleText = (EditText) findViewById(R.id.newPostTitle);

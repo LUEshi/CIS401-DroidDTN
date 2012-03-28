@@ -11,6 +11,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -72,6 +75,26 @@ public class MainAppScreenActivity extends ListActivity {
 	    }
 		*/
 	}	
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.settings_menu, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	        case R.id.settings:
+	        	Intent i = new Intent(this, SettingsActivity.class);
+				startActivity(i);
+				return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
 	
 	// Reload posts
 	public void update(){ posts = DataPacket.loadAll(db); }
