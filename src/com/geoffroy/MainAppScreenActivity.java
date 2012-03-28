@@ -44,6 +44,9 @@ public class MainAppScreenActivity extends ListActivity {
     // Connection service
     ConnectionService cService;
     boolean mBound = false;
+    
+    // DataPacketArrayAdapter to connect view to data posts
+    private DataPacketArrayAdapter dpArrayAdapter;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -55,7 +58,8 @@ public class MainAppScreenActivity extends ListActivity {
         posts = DataPacket.loadAll(db);
         
 		// Bind to our new adapter.
-        setListAdapter(new DataPacketArrayAdapter(this,posts));
+        dpArrayAdapter = new DataPacketArrayAdapter(this, posts);
+        setListAdapter(dpArrayAdapter);
         
         // Load settings, if username doesn't exist, load model as default
         SharedPreferences settings = getPreferences(MODE_PRIVATE);
@@ -132,25 +136,6 @@ public class MainAppScreenActivity extends ListActivity {
        
 	}
 	
-	@Override
-	// Called when NewPostActivity returns
-	// Creates a new DataPacket with the given information, persists the DP, and updates posts
-	/*protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK){
-			Bundle bun = data.getExtras();
-			String title = bun.getString("title");
-			String content = bun.getString("content");
-			
-			DataPacket dp = new DataPacket(username, title, content);
-			dp.persist(db);
-			update();
-	    }
-		else{
-			System.out.println("RESULT FAILED");
-	    }
-	}*/
-	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
@@ -214,20 +199,25 @@ public class MainAppScreenActivity extends ListActivity {
 	                // construct a string from the valid bytes in the buffer
 	                String readMessage = new String(readBuf, 0, msg.arg1);
 	                if(readMessage.startsWith(Util.COMPARISON_VECTOR_MSG)) {
-	                	cService.transferData(readMessage.substring(Util.COMPARISON_VECTOR_MSG.length() + 1));
+	                	cService.transferData(readMessage.substring(
+	                			Util.COMPARISON_VECTOR_MSG.length() + 1));
 	                } else {
 	                	// Save the received post to data storage
 	                	DataPacket newPost = new DataPacket(readMessage);
-	                	Log.d(TAG, "Received a message with title" + newPost.getTitle() + " and body " + newPost.getContent());
+	                	Log.d(TAG, "Received a message with title" 
+	                			+ newPost.getTitle() + " and body " + newPost.getContent());
 	            		newPost.persist(db);
 	            		update();
+	            		dpArrayAdapter.notifyDataSetChanged();
+	            		// TODO: This currently does not update the UI as it should
 	                }
 	                Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_LONG).show();
 	                break;
 	        	case Util.MESSAGE_DEVICE_NAME:
 	        		Toast.makeText(getApplicationContext(), "Connected to "
-                            + msg.getData().getString(Util.DEVICE_NAME), Toast.LENGTH_SHORT).show();
+                            + msg.getData().getString(Util.DEVICE_NAME), 
+                            Toast.LENGTH_SHORT).show();
 	        		break;
 	        	case Util.MESSAGE_REQUEST_DISCOVERABLE:
 	        		ensureDiscoverable();
@@ -241,8 +231,10 @@ public class MainAppScreenActivity extends ListActivity {
         Log.d(TAG, "ensure discoverable");
         if (mBluetoothAdapter.getScanMode() !=
             BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            Intent discoverableIntent = new Intent(
+            		BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(
+            		BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
             startActivity(discoverableIntent);
         }
     }

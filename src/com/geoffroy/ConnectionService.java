@@ -22,19 +22,20 @@ public class ConnectionService extends Service {
 
 	// Debugging
     private static final String TAG = "AndroidBackground_v3 - ConnectionService";
-	// Binder given to clients
+	// Binder given to clients to allow interaction
     private final IBinder mBinder = new LocalBinder();
-    // Handler received from application
+    // Handler received from application to allow messaging
     private Handler mHandler;
-        
-    // Member fields
+    // Bluetooth adapter
     private BluetoothAdapter mBtAdapter;
+    // Bluetooth devices found via discovery
     List<BluetoothDevice> devices;
+    // Helper Bluetooth service (contains connectivity threads)
     private Bluetooth bService;
-    
-    /* Database helper class */
+    // Database
     LocalStorage db;
-    ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
+    // DataPacket blog posts
+    ArrayList<DataPacket> posts;
         
 	/**
      * Class used for the client Binder.  Because we know this service always
@@ -66,23 +67,25 @@ public class ConnectionService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		
-		// Register for broadcasts when a device is discovered
+		/*
+		 * Broadcast registrations
+		 */
+		// When a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         this.registerReceiver(mReceiver, filter);
 
-        // Register for broadcasts when discovery has finished
+        // When discovery has finished
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         this.registerReceiver(mReceiver, filter);
         
-        // Register for broadcasts when scanning mode changes (ie. the
-        // device becomes un-discoverable)
+        // When scanning mode changes (ie. the device becomes un-discoverable)
         filter = new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         this.registerReceiver(mReceiver, filter);
 
-        // Get the local Bluetooth adapter
+        // Fetch the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
                 
-        // Create the Bluetooth helper class
+        // Instantiate the Bluetooth helper class
         bService = new Bluetooth(this.getApplicationContext());
         
         // Maintain a list of connectable devices
@@ -96,33 +99,29 @@ public class ConnectionService extends Service {
 	@Override
 	public void onDestroy() {
         super.onDestroy();
-
         // Make sure we're not doing discovery anymore
         if (mBtAdapter != null) {
             mBtAdapter.cancelDiscovery();
         }
-
         // Unregister broadcast listeners
-        this.unregisterReceiver(mReceiver);
-        
+        this.unregisterReceiver(mReceiver);  
         // Close the database
         db.close();
     }
 	
 	public void start() {
         toast("start()");
-        
+        // Start the Bluetooth helper instance
         if(bService != null && bService.getState() == Util.STATE_NONE)
         	bService.start();
-
         // Initiate a scan
         scan();
 	}
 	
 	/**
      * Initiates a scan for devices. Cancels ongoing discovery
-     * and re-initiates it. Discovered devices are stored in
-     * pairedDevices by BroadcastReceiver mReceiver.
+     * and re-initiates it. Discovered devices are added to
+     * devices by BroadcastReceiver mReceiver.
      * 
      * TODO: We currently wait till discovery completes before doing anything.
      * Instead, we might want to optimistically pair as soon as we find a
@@ -135,18 +134,14 @@ public class ConnectionService extends Service {
         if (mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
         }
-        
         // Clear the existing device list
-        Log.d(TAG, "Devices currently contains " + devices.size() + " devices.");
-        devices = new ArrayList<BluetoothDevice>();
-                
+        devices = new ArrayList<BluetoothDevice>();                
         // Request discovery from BluetoothAdapter
         boolean b = mBtAdapter.startDiscovery();
-        Log.e(TAG, "Discovery request returned " + b);
     }
     
     /**
-     * Connects with a bonded device.
+     * Connects with a paired device.
      * 
      * TODO: There is currently no logic dictating which device we decide
      * to pair with. This could instead be based on history, for instance.
@@ -157,11 +152,14 @@ public class ConnectionService extends Service {
     public void connect() {
     	toast("connect()");
 
+    	// Make sure there are actually devices to connect to, or return to scan
     	if(devices.size() < 1) {
     		Log.e(TAG, "We're attempting to connect but there are no connectable devices...");
+    		scan();
     		return;
     	}
-    	
+    	// TODO: Change the following logic, which currently hard-codes the
+    	// MAC address of our test phone
     	Iterator<BluetoothDevice> i = devices.iterator();
     	while(i.hasNext()) {
     		BluetoothDevice d = i.next();
@@ -177,44 +175,52 @@ public class ConnectionService extends Service {
     			return;
     		}
     	}
-    	Log.d(TAG, "Attempted to connect but found no devices.");
-    	scan();	// If we don't connect anywhere, we should resume scanning
+    	// If we don't connect anywhere, we should resume scanning
+    	scan();
     }
     
+    /**
+     * Perform a handshake with a connected device. Sends a message with the 
+     * COMPARISON_VECTOR_MSG preamble followed by the local blog comparison vector.
+     */
     public void handshake() {
     	toast("handshake()");
-    	/*
-	     * Sends a message with the COMPARISON_VECTOR_MSG preamble followed by the
-	     * local blog comparison vector.
-	     */
+    	// Check that we're actually connected before trying anything
+        if (bService.getState() != Util.STATE_CONNECTED) {
+        	toast("You are not connected to a device and cannot perform a handshake.");
+            return;
+        }
+    	// Get the local blog comparison vector and package it to a string
     	ArrayList<Integer> localVector = DataPacket.getBlogComparisonVector(db);
     	String msg = Util.COMPARISON_VECTOR_MSG + " " + TextUtils.join(";", localVector);
+    	// Send the local vector
     	bService.sendMessage(msg);
     	Log.d(TAG, "Sending out comparison message: " + msg);
     }
 	
-	// Data transfer
-    // vectorString was the received vector
+    /**
+     * Send data packets to the connected device. Diffs the local blog comparison
+     * vector to parameter vectorString (the foreign vector) and sends out each
+     * missing blog post in JSON format.
+     */
     public void transferData(String vectorString) {
     	toast("transferData()");
-    	/*
-         * Diffs the local blog comparison vector to vectorString and sends out each missing
-         * blog post in JSON format.
-         */
+    	// Check that we're actually connected before trying anything
+        if (bService.getState() != Util.STATE_CONNECTED) {
+        	toast("You are not connected to a device and cannot perform a handshake.");
+            return;
+        }
     	// Build the foreign vector
     	ArrayList<Integer> foreignVector = new ArrayList<Integer>();
-    	String[] vectorArray = vectorString.split(";");
-    	
+    	String[] vectorArray = vectorString.split(";"); 	
     	for(String arrayEl : vectorArray) {
     		if(arrayEl.length() > 0) {
     			foreignVector.add(Integer.valueOf(arrayEl));
     		}
-    	}
-    	
+    	}    	
     	// Fetch local messages
     	posts = DataPacket.loadAll(db);
-    	
-    	// Find missing messages
+    	// Find missing messages and send them
     	for(DataPacket post : posts) {
     		int hash = post.hashCode();
     		if(!foreignVector.contains(hash)) {
@@ -222,55 +228,46 @@ public class ConnectionService extends Service {
     			bService.sendMessage(post.toJson());
     		}
     	}
-    	
-    	// TODO: After sending the last message, send an "ALL DONE" message so the user can disconnect and move on
+    	// TODO: After sending the last message, send an "ALL DONE" message so 
+    	// the user can disconnect and move on
     }
+
+    /**
+     * TODO: Implement a disconnect() method to end a connection once all messages
+     * have been swapped. It should call start() to resume scanning and listening.
+     */
     
-    private DataPacket getDataPacketFromHash(int hashCode) {
-    	for(DataPacket post : posts) {
-    		if(post.hashCode() == hashCode) {
-    			return post;
-    		}
-    	}
-    	return null;
-    }
-	
-	// Inform UI, assuming we want to use interrupts; send a toast...
-	
-	// Disconnect from device
-    //start(); scan();
-    
- 	// The BroadcastReceiver that listens for discovered devices and
-    // changes the title when discovery is finished
+ 	// The BroadcastReceiver that listens for system broadcasts
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.length() > 0) {
-            	Log.d(TAG, "Action : " + action);
-            }
-
             // The Bluetooth scan mode has just changed
             if(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)) {
             	int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, 
             		      BluetoothAdapter.ERROR);
             	if(mode == BluetoothAdapter.SCAN_MODE_NONE 
             			|| mode == BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
-                    Message msg = mHandler.obtainMessage(Util.MESSAGE_REQUEST_DISCOVERABLE);
+            		// If the device is not currently discoverable, request that
+            		// it be made discoverable
+                    Message msg = mHandler.obtainMessage(
+                    		Util.MESSAGE_REQUEST_DISCOVERABLE);
                     mHandler.sendMessage(msg);
             	}
             }
             // The discovery service has just found a device
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Log.d(TAG, "Found a device named " + device.getName() + ", " + device.getAddress());
+                BluetoothDevice device = intent.getParcelableExtra(
+                		BluetoothDevice.EXTRA_DEVICE);
+                Log.d(TAG, "Found a device named " + device.getName() 
+                		+ ", " + device.getAddress());
                 // Add the device to our list
                 devices.add(device);
-            // When discovery is finished, attempt to establish a connection
+            // Discovery has just completed
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                Log.d(TAG, "Completed discovery with a total of " + devices.size() + " found devices.");
-                
+                Log.d(TAG, "Completed discovery with a total of " 
+                		+ devices.size() + " found devices.");
             	// If devices were found, attempt to connect; otherwise, repeat the scan
             	if(devices.size() > 0) {
             		connect();
