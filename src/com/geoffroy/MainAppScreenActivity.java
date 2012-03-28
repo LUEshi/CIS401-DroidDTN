@@ -44,6 +44,15 @@ public class MainAppScreenActivity extends ListActivity {
 	}
 	
 	@Override
+	public void onResume()
+	{
+		super.onResume();
+		posts = DataPacket.loadAll(db);
+		setListAdapter(new DataPacketArrayAdapter(this,posts));
+
+	}
+	
+	@Override
 	// Called when NewPostActivity returns
 	// Creates a new DataPacket with the given information, persists the DP, and updates posts
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -91,7 +100,7 @@ public class MainAppScreenActivity extends ListActivity {
 	
 	// To be called when New Post is clicked.
 	// Creates a new NewPostActivity and requests result.
-	public void newPost(){
+	public void onNewPostClick(View v){
 		Intent i = new Intent(this, NewPostActivity.class);       
         startActivityForResult(i, NEW_POST_REQUEST);
 	}

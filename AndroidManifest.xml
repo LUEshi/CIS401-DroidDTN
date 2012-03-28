@@ -30,15 +30,16 @@
         <activity android:name=".DeviceListActivity"
                   android:label="@string/select_device"
                   android:configChanges="orientation|keyboardHidden" />
-        <activity android:name="MainAppScreenActivity"></activity>
+        <activity android:name="MainAppScreenActivity">
+         <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+   </activity>
         <activity android:name="ViewPostActivity"></activity>
         <activity android:name="NewPostActivity"></activity>
         <activity android:name="SettingsActivity"></activity>
     <activity android:name="MainMenuActivity">
-    <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 </application>
 </manifest>

@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -12,7 +13,7 @@ import android.widget.EditText;
 public class NewPostActivity extends Activity {
 	private String title;
 	private String content;
-	
+	private String username;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -23,17 +24,22 @@ public class NewPostActivity extends Activity {
 	// Bundles the information and sends it back to MainAppScreenActivity.
 	// To be called by publish button.
 	public void onPublishButtonClick(View v){
-		
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        username = settings.getString("username", android.os.Build.MODEL);
+        
 		EditText titleText = (EditText) findViewById(R.id.newPostTitle);
 		EditText messageText = (EditText) findViewById(R.id.newMessage);
+		
 		
 		setPostTitle(titleText.getText().toString());
 		setContent(messageText.getText().toString());
 		
-		//TODO: actual author
-		DataPacket newPost = new DataPacket("PERSON!", title, content);
+		DataPacket newPost = new DataPacket(username, title, content);
 		newPost.persist(new LocalStorage(this));
 		
+		finish();
+		
+		/*
 		Intent i = new Intent();
 		Bundle bun = new Bundle();
 		bun.putString("title", title);
@@ -49,9 +55,9 @@ public class NewPostActivity extends Activity {
 		    return;  
 		  } });   
 		  ((Dialog) alertDialog).show();
-	*/	
+	
 		setResult(RESULT_OK, i);
-		finish();
+	*/
 	}
 	
 	public String getPostTitle() {	return title;	}
