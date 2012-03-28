@@ -57,7 +57,8 @@ public class MainAppScreenActivity extends ListActivity {
 	// Creates a new DataPacket with the given information, persists the DP, and updates posts
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK){
+		/*
+		 * if(resultCode == RESULT_OK){
 			Bundle bun = data.getExtras();
 			String title = bun.getString("title");
 			String content = bun.getString("content");
@@ -69,6 +70,7 @@ public class MainAppScreenActivity extends ListActivity {
 		else{
 			System.out.println("RESULT FAILED");
 	    }
+		*/
 	}	
 	
 	// Reload posts
