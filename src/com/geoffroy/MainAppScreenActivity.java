@@ -220,6 +220,7 @@ public class MainAppScreenActivity extends ListActivity {
 	                	DataPacket newPost = new DataPacket(readMessage);
 	                	Log.d(TAG, "Received a message with title" + newPost.getTitle() + " and body " + newPost.getContent());
 	            		newPost.persist(db);
+	            		update();
 	                }
 	                Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_LONG).show();
