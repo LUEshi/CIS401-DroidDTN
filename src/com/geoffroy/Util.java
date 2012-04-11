@@ -25,12 +25,16 @@ public class Util {
     
     // Header for comparison vector messages
     public static final String COMPARISON_VECTOR_MSG = "comparison_vector_msg";
+    public static final String CLOSE_TRANSMISSION_MSG = "close_transmission_msg";
     
     // Intent request codes
     public static final int REQUEST_ENABLE_BT = 3;
     
     // Device name
     public static final String DEVICE_NAME = "device_name";
+    
+    // Delay for the ConnectionService timer (in ms)
+    public static final int TIMER_DELAY = 30000;
     
     public static void toast(Handler h, String s) {
     	// Send a message back to the Activity

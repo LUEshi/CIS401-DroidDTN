@@ -110,10 +110,14 @@ public class MainAppScreenActivity extends ListActivity {
 				cService.start();
 			else if(cService.getState() == Util.STATE_LISTEN)
 				cService.scan();
+			else
+				Toast.makeText(getApplicationContext(), "Resumed with state " + cService.getState(),
+                        Toast.LENGTH_SHORT).show();
         } else if(cService == null) {
         	Intent intent = new Intent(this, ConnectionService.class);
     		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        	Log.e(TAG,"ConnectionService was found null.");
+        	Log.e(TAG,"ConnectionService was found null. This should only happen" +
+        			"if this is the first time onResume() is called.");
         }
 	}
 	
@@ -142,9 +146,12 @@ public class MainAppScreenActivity extends ListActivity {
         case Util.REQUEST_ENABLE_BT:
             // When the request to enable Bluetooth returns
             if (resultCode == Activity.RESULT_OK) {
-                // Bluetooth is now enabled, so set up the connection service
-            	Intent intent = new Intent(this, ConnectionService.class);
-        	    bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            	ensureDiscoverable();
+            	// Bluetooth is now enabled, so set up the connection service
+            	if (cService == null) {
+            		Intent intent = new Intent(this, ConnectionService.class);
+            		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            	}
             } else {
                 // User did not enable Bluetooth or an error occured
                 Log.d(TAG, "BT not enabled");
@@ -165,13 +172,14 @@ public class MainAppScreenActivity extends ListActivity {
             LocalBinder binder = (LocalBinder) service;
             cService = binder.getService();
             mBound = true;
-            cService.setMhandler(new NetworkHandle());
+            cService.setAppHandler(new NetworkHandle());
+            cService.start();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
-            cService.setMhandler(null);
+            cService.setAppHandler(null);
         }
     };
     
@@ -184,8 +192,9 @@ public class MainAppScreenActivity extends ListActivity {
 	                Toast.makeText(getApplicationContext(), msg.getData().getString(Util.TOAST),
 	                               Toast.LENGTH_SHORT).show();
 	                break;
-	        	case Util.MESSAGE_NO_CONNECTION:	// If a connection fails or is lost, we should resume scanning
-	        		cService.start();
+	        	case Util.MESSAGE_NO_CONNECTION:
+	        		// We currently do nothing if a connection fails or is lost,
+	        		// since the service timer will get clean things up
 	        		break;
 	        	case Util.MESSAGE_STATE_CHANGE:
 	        		if(msg.arg1 == Util.STATE_CONNECTED) {
@@ -201,6 +210,8 @@ public class MainAppScreenActivity extends ListActivity {
 	                if(readMessage.startsWith(Util.COMPARISON_VECTOR_MSG)) {
 	                	cService.transferData(readMessage.substring(
 	                			Util.COMPARISON_VECTOR_MSG.length() + 1));
+	                } else if(readMessage.startsWith(Util.CLOSE_TRANSMISSION_MSG)) {
+	                	cService.closeConnection();
 	                } else {
 	                	// Save the received post to data storage
 	                	DataPacket newPost = new DataPacket(readMessage);
