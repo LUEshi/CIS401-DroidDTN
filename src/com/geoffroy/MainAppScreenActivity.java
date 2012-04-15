@@ -280,6 +280,7 @@ public class MainAppScreenActivity extends ListActivity {
 		bun.putString("author", dp.getAuthor());
 		bun.putString("title", dp.getTitle());
 		bun.putString("content", dp.getContent());
+		bun.putString("type", dp.getType());
 
 		intent.setClass(this, ViewPostActivity.class);
 		intent.putExtras(bun);

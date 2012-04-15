@@ -14,7 +14,7 @@ public class ViewPostActivityTest extends
 	
 	private MainAppScreenActivity mActivity;
 	private ViewPostActivity vActivity;
-	DataPacket dp = new DataPacket("author", "title", "content");
+	DataPacket dp = new DataPacket("author", "title", "content", "TEXT");
 	
 	public ViewPostActivityTest() {
 		super("com.geoffroy", ViewPostActivity.class);
@@ -34,6 +34,7 @@ public class ViewPostActivityTest extends
 		assertEquals(dp.getAuthor(), vActivity.getAuthor());
 		assertEquals(dp.getTitle(), vActivity.getPostTitle());
 		assertEquals(dp.getContent(), vActivity.getContent());
+		assertEquals(dp.getType(), vActivity.getType());
 	}
 
 }

@@ -13,16 +13,18 @@ public class DataPacket {
 	private String author;
 	private String title;
 	private String content;
+	private String type;
 	
 	/*
 	 * Default constructor
 	 */
-	public DataPacket(String author, String title, String content) {
+	public DataPacket(String author, String title, String content, String type) {
 		this.localID = 0;
 		this.created = System.currentTimeMillis();
 		this.author = author;
 		this.title = title;
 		this.content = content;
+		this.type = type;
 	}
 	
 	/*
@@ -35,6 +37,7 @@ public class DataPacket {
 			this.author = json.getString("author");
 			this.title = json.getString("title");
 			this.content = json.getString("content");
+			this.type = json.getString("type");
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -48,8 +51,10 @@ public class DataPacket {
 	public void setAuthor(String author) {	this.author = author;	}
 	public String getTitle() {	return title;	}
 	public void setTitle(String title) {	this.title = title;	}
-	public String getContent() {	return content;	}
+	public String getContent() {	return this.content;	}
 	public void setContent(String content) {	this.content = content;	}
+	public String getType() {	return type;	}
+	public void setType(String type) {	this.type = type;	}
 	
 	public int hashCode() {
 		String s = String.valueOf(created) + author + title;
@@ -72,6 +77,7 @@ public class DataPacket {
 			json.put("author", this.author);
 			json.put("title", this.title);
 			json.put("content", this.content);
+			json.put("type", this.type);
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
@@ -90,7 +96,7 @@ public class DataPacket {
 		
 		if(mCursor.moveToFirst()) {
 			do {
-				post = new DataPacket(mCursor.getString(2), mCursor.getString(3), mCursor.getString(4));
+				post = new DataPacket(mCursor.getString(2), mCursor.getString(3), mCursor.getString(4), mCursor.getString(5));
 				post.setLocalID(mCursor.getInt(0));
 				post.setCreated(mCursor.getInt(1));
 				posts.add(post);

@@ -1,11 +1,16 @@
 package com.geoffroy;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -15,6 +20,8 @@ public class NewPostActivity extends Activity {
 	private String title;
 	private String content;
 	private String username;
+	private String type;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,35 +42,25 @@ public class NewPostActivity extends Activity {
 		setPostTitle(titleText.getText().toString());
 		setContent(messageText.getText().toString());
 		
-		DataPacket newPost = new DataPacket(username, title, content);
+		DataPacket newPost = new DataPacket(username, title, content, type);
 		newPost.persist(new LocalStorage(this));
 		
 		finish();
-		
-		/*
-		Intent i = new Intent();
-		Bundle bun = new Bundle();
-		bun.putString("title", title);
-		bun.putString("content", content);
-		i.putExtras(bun);
-		
-		//TODO: remove test code
-/*		Object alertDialog = new AlertDialog.Builder(this).create();  
-//		  ((Activity) alertDialog).setTitle(title);  
-		  ((AlertDialog) alertDialog).setMessage("Message: " + content + "\nPushed to DB");  
-		  ((AlertDialog) alertDialog).setButton("OK",new DialogInterface.OnClickListener(){  
-		    public void onClick(DialogInterface dialog, int which) {  
-		    return;  
-		  } });   
-		  ((Dialog) alertDialog).show();
+	}
 	
-		setResult(RESULT_OK, i);
-	*/
+	public String encodePicture(String fileName) throws UnsupportedEncodingException{
+		Bitmap bitmap = BitmapFactory.decodeFile(fileName);
+	    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream); 
+	    byte[] byteArray = outputStream.toByteArray();
+	    return new String(byteArray, "UTF-8");
 	}
 	
 	public String getPostTitle() {	return title;	}
 	public void setPostTitle(String title) {	this.title = title;	}
 	public String getContent() {	return content;	}
 	public void setContent(String content) {	this.content = content;	}
+	public String getType() {	return type;	}
+	public void setType(String type) {	this.type = type;	}
 
 }

@@ -31,6 +31,7 @@ public class LocalStorage {
 		values.put("author", packet.getAuthor());
 		values.put("title", packet.getTitle());
 		values.put("content", packet.getContent());
+		values.put("type", packet.getType());
 		return db.insert(TABLE_NAME, null, values);		
 	}
 	
@@ -44,12 +45,13 @@ public class LocalStorage {
 		values.put("author", packet.getAuthor());
 		values.put("title", packet.getTitle());
 		values.put("content", packet.getContent());
+		values.put("type", packet.getType());
 		return db.update(TABLE_NAME, values, "localID" + "=" + packet.getLocalID(), null) > 0;
 	}
 	
 	public Cursor get(long ID) throws SQLException {
 		Cursor mCursor = db.query(true, TABLE_NAME, 
-				new String[] {"localID", "created", "author", "title", "content"}, 
+				new String[] {"localID", "created", "author", "title", "content", "type"}, 
 				"localID" + "=" + ID, null, null, null, null, null);
 	
 		if(mCursor != null) {
@@ -58,9 +60,10 @@ public class LocalStorage {
 		return mCursor;
 	}
 	
+	//TODO: is that the correct number of nulls?
 	public Map<String,String> getPostMap(long ID) throws SQLException {
 		Cursor mCursor = db.query(true, TABLE_NAME, 
-				new String[] {"localID", "created", "author", "title", "content"}, 
+				new String[] {"localID", "created", "author", "title", "content", "type"}, 
 				"localID" + "=" + ID, null, null, null, null, null);
 	
 		Map<String,String> post = new HashMap<String,String>();
@@ -73,6 +76,7 @@ public class LocalStorage {
 				post.put("author",mCursor.getString(mCursor.getColumnIndex("author")));
 				post.put("title",mCursor.getString(mCursor.getColumnIndex("title")));
 				post.put("content",mCursor.getString(mCursor.getColumnIndex("content")));
+				post.put("type", mCursor.getString(mCursor.getColumnIndex("type")));
 				return post;
 			}
 			else
@@ -86,7 +90,7 @@ public class LocalStorage {
 	
 	public Cursor getAll() throws SQLException {
 		return db.query(TABLE_NAME, 
-				new String[] {"localID", "created", "author", "title", "content"}, 
+				new String[] {"localID", "created", "author", "title", "content", "type"}, 
 				null, null, null, null, null);
 	}
 	
@@ -106,7 +110,8 @@ public class LocalStorage {
 	    			"created INTEGER, " +
 	    			"author TEXT, " +
 	    			"title TEXT, " +
-	    			"content TEXT);");
+	    			"content TEXT, " +
+	    			"type TEXT);");
 		}
  
 		@Override

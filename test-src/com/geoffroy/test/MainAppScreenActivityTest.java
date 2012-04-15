@@ -38,7 +38,7 @@ public class MainAppScreenActivityTest extends
 	public void testPost(){
 		// Create a new DataPacket and insert it into the database
 		int size = mActivity.getPosts().size();
-		DataPacket dp = new DataPacket("author", "title", "content");
+		DataPacket dp = new DataPacket("author", "title", "content", "TEXT");
 		mActivity.getDB().insert(dp);
 		
 		// Update the activity's posts variable and check its value
@@ -48,6 +48,7 @@ public class MainAppScreenActivityTest extends
 		assertEquals(dp.getAuthor(), mActivity.getPosts().get(size).getAuthor());
 		assertEquals(dp.getTitle(), mActivity.getPosts().get(size).getTitle());
 		assertEquals(dp.getContent(), mActivity.getPosts().get(size).getContent());
+		assertEquals(dp.getType(), mActivity.getPosts().get(size).getType());
 		
 		// We should probably come up with some .equals method because this keeps failing...
 		//assertEquals(dp, mActivity.getPosts().get(0));
