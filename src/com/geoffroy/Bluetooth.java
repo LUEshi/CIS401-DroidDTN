@@ -1,5 +1,7 @@
 package com.geoffroy;
 /*
+ * MOST OF THE CODE IN THIS FILE IS:
+ * 
  * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,22 +41,23 @@ import android.util.Log;
 public class Bluetooth {
 	
     // Debugging
-    private static final String TAG = "AndroidBackground_v3 - Bluetooth";
+    private static final String TAG = "DroidDTN - Bluetooth";
     // Name for the SDP record when creating server socket
     private static final String NAME = "DroidDTN";
     // Unique UUID for this application
-    private static final UUID MY_UUID = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+    private static final UUID MY_UUID = 
+    		UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
 
     // Member fields
     private final BluetoothAdapter mAdapter;
-    private Handler mHandler;
+    private Handler appHandler;
     private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
 
     /**
-     * Constructor. Prepares a new Bluetooth session. mState is initiallized to
+     * Constructor. Prepares a new Bluetooth session. mState is initialized to
      * STATE_NONE, and mHandler is passed from ConnectionService later.
      * @param context  The UI Activity Context
      */
@@ -64,7 +67,7 @@ public class Bluetooth {
     }
     
     public void setHandler(Handler h) {
-    	this.mHandler = h;
+    	this.appHandler = h;
     }
 
     /**
@@ -76,7 +79,7 @@ public class Bluetooth {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(Util.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        appHandler.obtainMessage(Util.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -146,11 +149,11 @@ public class Bluetooth {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(Util.MESSAGE_DEVICE_NAME);
+        Message msg = appHandler.obtainMessage(Util.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
         bundle.putString(Util.DEVICE_NAME, device.getName());
         msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        appHandler.sendMessage(msg);
 
         setState(Util.STATE_CONNECTED);
     }
@@ -209,9 +212,14 @@ public class Bluetooth {
         setState(Util.STATE_LISTEN);
 
         // Send a failure message back to the Activity
-        mHandler.obtainMessage(Util.MESSAGE_NO_CONNECTION, -1, -1).sendToTarget();
+        appHandler.obtainMessage(Util.MESSAGE_NO_CONNECTION, -1, -1).sendToTarget();
         toast("Unable to connect device: " + e.getMessage());
-    }
+        Log.d(TAG, "Unable to connect device:" + e.getMessage());
+        StackTraceElement[] st = e.getStackTrace();
+        for(int i = 0; i < st.length; i++) {
+        	Log.d(TAG, st[i].toString());
+        }
+   }
 
     /**
      * Indicate that the connection was lost and notify the UI Activity.
@@ -220,7 +228,7 @@ public class Bluetooth {
         setState(Util.STATE_LISTEN);
 
         // Send a failure message back to the Activity
-        mHandler.obtainMessage(Util.MESSAGE_NO_CONNECTION, -1, -1).sendToTarget();
+        appHandler.obtainMessage(Util.MESSAGE_NO_CONNECTION, -1, -1).sendToTarget();
         toast("Device connection was lost:" + e.getMessage());
     }
 
@@ -314,9 +322,10 @@ public class Bluetooth {
             // given BluetoothDevice
             try {
                 tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-            } catch (IOException e) {
-                Log.e(TAG, "create() failed", e);
-            }
+            } catch (Exception e) {
+            	Log.e(TAG, "create() failed", e);
+				e.printStackTrace();
+			}
             mmSocket = tmp;
         }
 
@@ -366,6 +375,9 @@ public class Bluetooth {
     /**
      * This thread runs during a connection with a remote device.
      * It handles all incoming and outgoing transmissions.
+     * 
+     * The problem occurs when the listening device is not actually listening. That is what "Service Discovery
+     * Failed" means. We need to make sure that the listener is *always* running.
      */
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
@@ -402,7 +414,7 @@ public class Bluetooth {
                     bytes = mmInStream.read(buffer);
 
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(Util.MESSAGE_READ, bytes, -1, buffer)
+                    appHandler.obtainMessage(Util.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
@@ -421,7 +433,7 @@ public class Bluetooth {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(Util.MESSAGE_WRITE, -1, -1, buffer)
+                appHandler.obtainMessage(Util.MESSAGE_WRITE, -1, -1, buffer)
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
@@ -438,6 +450,6 @@ public class Bluetooth {
     }
     
     private void toast(String s) {
-    	Util.toast(mHandler, s);
+    	Util.toast(appHandler, s);
     }
 }

@@ -21,11 +21,13 @@ import android.util.Log;
 public class ConnectionService extends Service {
 
 	// Debugging
-    private static final String TAG = "AndroidBackground_v3 - ConnectionService";
+    private static final String TAG = "DroidDTN - ConnectionService";
 	// Binder given to clients to allow interaction
     private final IBinder mBinder = new LocalBinder();
     // Handler received from application to allow messaging
-    private Handler mHandler;
+    private Handler appHandler;
+    // Internal handler at the service level to handle the timer
+    private Handler timerHandler;
     // Bluetooth adapter
     private BluetoothAdapter mBtAdapter;
     // Bluetooth devices found via discovery
@@ -52,8 +54,8 @@ public class ConnectionService extends Service {
         return mBinder;
     }
 
-	public void setMhandler(Handler handler) {
-		mHandler = handler;
+	public void setAppHandler(Handler handler) {
+		appHandler = handler;
 		
 		if(bService != null)
 			bService.setHandler(handler);
@@ -91,6 +93,9 @@ public class ConnectionService extends Service {
         // Maintain a list of connectable devices
         devices = new ArrayList<BluetoothDevice>();
         
+        // Initialize the timer handler to trigger the first scan
+        timerHandler = new Handler();
+        
         // Load the database
         db = new LocalStorage(this);
         posts = DataPacket.loadAll(db);
@@ -104,16 +109,44 @@ public class ConnectionService extends Service {
             mBtAdapter.cancelDiscovery();
         }
         // Unregister broadcast listeners
-        this.unregisterReceiver(mReceiver);  
+        this.unregisterReceiver(mReceiver);
         // Close the database
         db.close();
     }
 	
+	/**
+	 * Timer task manages the service's running loop. Upon execution, if the state
+	 * is STATE_NONE or STATE_LISTEN (ie. we're neither connected nor connecting),
+	 * it will ensure that we are listening for incoming BlueTooth connections, 
+	 * and it will initiate a scan.
+	 */
+	private Runnable timerTask = new Runnable() {
+		public void run() {
+			if(bService.getState() == Util.STATE_NONE || bService.getState() == Util.STATE_LISTEN) {
+				toast("Timer triggered bService start and scan().");
+				bService.start();
+				scan();
+			}
+			
+			timerHandler.postDelayed(this, Util.TIMER_DELAY);
+		}
+	};
+	
+	/**
+	 * In normal operation, start() is called once when MainAppScreenActivity binds
+	 * to this ConnectionService instance. Start() starts the BlueTooth helper instance,
+	 * turns on the service timer, and initiates a first scan.
+	 */
 	public void start() {
         toast("start()");
         // Start the Bluetooth helper instance
         if(bService != null && bService.getState() == Util.STATE_NONE)
         	bService.start();
+        
+        // Call our first timer event
+        timerHandler.removeCallbacks(timerTask);
+        timerHandler.postDelayed(timerTask, Util.TIMER_DELAY);
+
         // Initiate a scan
         scan();
 	}
@@ -137,11 +170,11 @@ public class ConnectionService extends Service {
         // Clear the existing device list
         devices = new ArrayList<BluetoothDevice>();                
         // Request discovery from BluetoothAdapter
-        boolean b = mBtAdapter.startDiscovery();
+        mBtAdapter.startDiscovery();
     }
     
     /**
-     * Connects with a paired device.
+     * Connects with an available device.
      * 
      * TODO: There is currently no logic dictating which device we decide
      * to pair with. This could instead be based on history, for instance.
@@ -163,8 +196,8 @@ public class ConnectionService extends Service {
     	Iterator<BluetoothDevice> i = devices.iterator();
     	while(i.hasNext()) {
     		BluetoothDevice d = i.next();
-    		//if(d.getAddress().equals("D8:54:3A:BD:39:2B")) {	 // Test phone
-    		if(d.getAddress().equals("3C:5A:37:87:6E:F2")) {	// Nexus S
+    		if(d.getAddress().equals("3C:5A:37:87:6E:F2") // Nexus S
+    				|| d.getAddress().equals("D8:54:3A:BD:39:2B")) {	// Test phone
     			toast("Found test phone and returning it for connection: " + d.getAddress());
     			
     			// Cancel discovery because it's costly and we're about to connect
@@ -175,13 +208,11 @@ public class ConnectionService extends Service {
     			return;
     		}
     	}
-    	// If we don't connect anywhere, we should resume scanning
-    	scan();
     }
     
     /**
      * Perform a handshake with a connected device. Sends a message with the 
-     * COMPARISON_VECTOR_MSG preamble followed by the local blog comparison vector.
+     * COMPARISON_VECTOR_MSG header followed by the local blog comparison vector.
      */
     public void handshake() {
     	toast("handshake()");
@@ -201,7 +232,9 @@ public class ConnectionService extends Service {
     /**
      * Send data packets to the connected device. Diffs the local blog comparison
      * vector to parameter vectorString (the foreign vector) and sends out each
-     * missing blog post in JSON format.
+     * missing blog post in JSON format. Also sends a CLOSE_TRANSMISSION_MSG
+     * once every blog post has been sent, so that the other device knows that the
+     * connection can be safely shut off.
      */
     public void transferData(String vectorString) {
     	toast("transferData()");
@@ -228,14 +261,27 @@ public class ConnectionService extends Service {
     			bService.sendMessage(post.toJson());
     		}
     	}
+    	
+    	// Send a message to indicate that we've finished sending messages
+    	bService.sendMessage(Util.CLOSE_TRANSMISSION_MSG);
+    	Log.d(TAG, "Sending out close transmission message.");
     	// TODO: After sending the last message, send an "ALL DONE" message so 
     	// the user can disconnect and move on
     }
-
-    /**
-     * TODO: Implement a disconnect() method to end a connection once all messages
-     * have been swapped. It should call start() to resume scanning and listening.
-     */
+    
+    public void closeConnection() {
+    	toast("closeConnection()");
+    	
+    	// Check that we're actually connected before trying anything
+        if (bService.getState() != Util.STATE_CONNECTED) {
+        	toast("You are not connected to a device and cannot disconnect.");
+            return;
+        }
+        
+        // Resume listening for incoming connections (it also calls bService.stop()
+        // to make sure all threads are safely destroyed)
+        bService.start();
+    }
     
  	// The BroadcastReceiver that listens for system broadcasts
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -250,9 +296,9 @@ public class ConnectionService extends Service {
             			|| mode == BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
             		// If the device is not currently discoverable, request that
             		// it be made discoverable
-                    Message msg = mHandler.obtainMessage(
+                    Message msg = appHandler.obtainMessage(
                     		Util.MESSAGE_REQUEST_DISCOVERABLE);
-                    mHandler.sendMessage(msg);
+                    appHandler.sendMessage(msg);
             	}
             }
             // The discovery service has just found a device
@@ -271,8 +317,6 @@ public class ConnectionService extends Service {
             	// If devices were found, attempt to connect; otherwise, repeat the scan
             	if(devices.size() > 0) {
             		connect();
-            	} else {
-            		scan();
             	}
 			}
         }
@@ -280,6 +324,6 @@ public class ConnectionService extends Service {
     
     private void toast(String s) {
     	Log.d(TAG, "toasted: " + s);
-    	Util.toast(mHandler, s);
+    	Util.toast(appHandler, s);
     }
 }
