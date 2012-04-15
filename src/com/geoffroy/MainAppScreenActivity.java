@@ -183,6 +183,12 @@ public class MainAppScreenActivity extends ListActivity {
         }
     };
     
+    
+    //Use this code to refresh the screen when new posts are found
+    //posts = DataPacket.loadAll(db);
+    //dpArrayAdapter.notifyDataSetChanged()
+    
+    
     // The Handler that gets information back from the BluetoothChatService
     class NetworkHandle extends Handler {
         @Override
