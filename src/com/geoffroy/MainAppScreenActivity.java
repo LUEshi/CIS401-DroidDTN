@@ -28,7 +28,7 @@ public class MainAppScreenActivity extends ListActivity {
 	
 	// Debugging
     private static final String TAG = "DroidDTN - MainAppScreenActivity";
-    
+   
 	/* Database helper class */
     LocalStorage db;
     ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
@@ -36,8 +36,9 @@ public class MainAppScreenActivity extends ListActivity {
     // Username from settings
     private String username;
     
-    int NEW_POST_REQUEST = 0;
-    
+    private static final int NEW_POST_REQUEST = 0;
+	private static final int NEW_PICTURE_REQUEST = 1;
+	
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
     
@@ -306,7 +307,11 @@ public class MainAppScreenActivity extends ListActivity {
 		Intent i = new Intent(this, NewPostActivity.class);       
         startActivityForResult(i, NEW_POST_REQUEST);
 	}
-	
+
+	public void onNewPictureClick(View v){
+		Intent i = new Intent(this, NewPictureActivity.class);       
+        startActivityForResult(i, NEW_PICTURE_REQUEST);
+	}
 	
 	// GETTERS
 	public ArrayList<DataPacket> getPosts(){  return posts; }
