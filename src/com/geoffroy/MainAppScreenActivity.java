@@ -85,6 +85,7 @@ public class MainAppScreenActivity extends ListActivity {
 		// If BT is not on, request that it be enabled.
         // the connection service will then be called during onActivityResult
         if (!mBluetoothAdapter.isEnabled()) {
+        	Log.d(TAG, "NO BLUETOOTH");
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, Util.REQUEST_ENABLE_BT);
         }
@@ -106,7 +107,8 @@ public class MainAppScreenActivity extends ListActivity {
 		posts = DataPacket.loadAll(db);
 		setListAdapter(new DataPacketArrayAdapter(this,posts));
 
-		if(cService != null) {
+		// TODO: Figure out if this code is necessary
+		/*if(cService != null) {
 			if(cService.getState() == Util.STATE_NONE)
 				cService.start();
 			else if(cService.getState() == Util.STATE_LISTEN)
@@ -119,7 +121,7 @@ public class MainAppScreenActivity extends ListActivity {
     		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         	Log.e(TAG,"ConnectionService was found null. This should only happen" +
         			"if this is the first time onResume() is called.");
-        }
+        }*/
 	}
 	
 	@Override
