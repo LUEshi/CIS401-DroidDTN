@@ -165,7 +165,6 @@ public class MainAppScreenActivity extends ListActivity {
 	/** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
 
-        @Override
         public void onServiceConnected(ComponentName className,
                 IBinder service) {
             // We've bound to ConnectionService, cast the IBinder and get ConnectionService instance
@@ -176,7 +175,6 @@ public class MainAppScreenActivity extends ListActivity {
             cService.start();
         }
 
-        @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
             cService.setAppHandler(null);
