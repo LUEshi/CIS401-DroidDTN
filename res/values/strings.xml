@@ -15,7 +15,7 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Bluetooth Chat</string>
+    <string name="app_name">DroidDTN</string>
 
     <!--  BluetoothChat -->
     <string name="send">Send</string>

@@ -47,15 +47,7 @@ public class NewPostActivity extends Activity {
 		
 		finish();
 	}
-	
-	public String encodePicture(String fileName) throws UnsupportedEncodingException{
-		Bitmap bitmap = BitmapFactory.decodeFile(fileName);
-	    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-	    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream); 
-	    byte[] byteArray = outputStream.toByteArray();
-	    return new String(byteArray, "UTF-8");
-	}
-	
+		
 	public String getPostTitle() {	return title;	}
 	public void setPostTitle(String title) {	this.title = title;	}
 	public String getContent() {	return content;	}
