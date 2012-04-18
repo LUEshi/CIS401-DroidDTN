@@ -31,17 +31,13 @@ public class DataPacket {
 	/*
 	 * Constructor used when receiving a post from another device
 	 */
-	public DataPacket(String jsonString) {
-		try {
-			JSONObject json = new JSONObject(jsonString);
-			this.created = json.getLong("created");
-			this.author = json.getString("author");
-			this.title = json.getString("title");
-			this.content = json.getString("content");
-			this.type = json.getString("type");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+	public DataPacket(String jsonString) throws JSONException {
+		JSONObject json = new JSONObject(jsonString);
+		this.created = json.getLong("created");
+		this.author = json.getString("author");
+		this.title = json.getString("title");
+		this.content = json.getString("content");
+		this.type = json.getString("type");
 	}
 
 	public long getLocalID() {	return localID;	}

@@ -36,6 +36,11 @@ public class Util {
     // Delay for the ConnectionService timer (in ms)
     public static final int TIMER_DELAY = 30000;
     
+    // Message types
+    public static final String POST_TYPE_IMAGE = "img";
+    public static final String POST_TYPE_TEXT = "txt";
+    public static final String POST_TYPE_AUDIO = "aud";
+    
     public static void toast(Handler h, String s) {
     	// Send a message back to the Activity
         Message msg = h.obtainMessage(Util.MESSAGE_TOAST);

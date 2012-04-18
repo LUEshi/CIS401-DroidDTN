@@ -60,9 +60,8 @@ public class NewPictureActivity extends Activity {
 
 			String title = (titleText.getText().toString());
 			String content = encodePicture(selectedImagePath);
-			String type = "image";
 			
-			DataPacket newPost = new DataPacket(username, title, content, type);
+			DataPacket newPost = new DataPacket(username, title, content, Util.POST_TYPE_IMAGE);
 			newPost.persist(new LocalStorage(this));
 			
 			finish();

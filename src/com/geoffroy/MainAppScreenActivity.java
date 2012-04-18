@@ -2,6 +2,8 @@ package com.geoffroy;
 
 import java.util.ArrayList;
 
+import org.json.JSONException;
+
 import com.geoffroy.ConnectionService.LocalBinder;
 
 import android.app.Activity;
@@ -213,16 +215,26 @@ public class MainAppScreenActivity extends ListActivity {
 	                			Util.COMPARISON_VECTOR_MSG.length() + 1));
 	                } else if(readMessage.startsWith(Util.CLOSE_TRANSMISSION_MSG)) {
 	                	cService.closeConnection();
+	                } else if(readMessage.length() == 0) {
+	                	Log.e(TAG, "Received an empty post.");
 	                } else {
 	                	// Save the received post to data storage
-	                	DataPacket newPost = new DataPacket(readMessage);
-	                	Log.d(TAG, "Received a message with title" 
-	                			+ newPost.getTitle() + " and body " + newPost.getContent());
-	            		newPost.persist(db);
-	            		
-	            		// Refresh the screen when new posts are found
-	            	    posts = DataPacket.loadAll(db);
-	            	    dpArrayAdapter.notifyDataSetChanged();
+	                	DataPacket newPost;
+						try {
+							newPost = new DataPacket(readMessage);
+							
+							Log.d(TAG, "Received a message with title" 
+		                			+ newPost.getTitle() + " and body " + newPost.getContent());
+		            		newPost.persist(db);
+		            		
+		            		// Refresh the screen when new posts are found
+		            	    posts = DataPacket.loadAll(db);
+		            	    dpArrayAdapter.notifyDataSetChanged();
+						} catch (JSONException e) {
+							Log.e(TAG, "Received a post that could not be parsed: " + readMessage);
+							Log.e(TAG, e.getMessage());
+							break;
+						}
 	                }
 	                Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_LONG).show();
