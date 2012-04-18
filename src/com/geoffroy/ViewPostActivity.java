@@ -1,6 +1,8 @@
 package com.geoffroy;
 
 
+import java.util.Date;
+
 import android.widget.TextView;
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -39,6 +41,9 @@ public class ViewPostActivity extends Activity {
 		
 		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_author);
 		temp.setText(author);
+		
+		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_created);
+		temp.setText(new Date(created).toString());
 		
 		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_message);
 		temp.setText(content);

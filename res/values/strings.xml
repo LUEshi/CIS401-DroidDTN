@@ -48,5 +48,6 @@
     <!-- post details -->
     <string name="message_text">Message: </string>
     <string name="author">By: </string>
+    <string name="created">Created: </string>
     
 </resources>
