@@ -42,7 +42,7 @@ public class NewPostActivity extends Activity {
 		setPostTitle(titleText.getText().toString());
 		setContent(messageText.getText().toString());
 		
-		DataPacket newPost = new DataPacket(username, title, content, type);
+		DataPacket newPost = new DataPacket(username, title, content, Util.POST_TYPE_TEXT);
 		newPost.persist(new LocalStorage(this));
 		
 		finish();

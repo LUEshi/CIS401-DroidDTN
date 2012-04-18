@@ -6,7 +6,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.database.Cursor;
-import android.util.Log;
 
 public class DataPacket {
 	private long localID;
@@ -31,17 +30,13 @@ public class DataPacket {
 	/*
 	 * Constructor used when receiving a post from another device
 	 */
-	public DataPacket(String jsonString) {
-		try {
-			JSONObject json = new JSONObject(jsonString);
-			this.created = json.getLong("created");
-			this.author = json.getString("author");
-			this.title = json.getString("title");
-			this.content = json.getString("content");
-			this.type = json.getString("type");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+	public DataPacket(String jsonString) throws JSONException {
+		JSONObject json = new JSONObject(jsonString);
+		this.created = json.getLong("created");
+		this.author = json.getString("author");
+		this.title = json.getString("title");
+		this.content = json.getString("content");
+		this.type = json.getString("type");
 	}
 
 	public long getLocalID() {	return localID;	}
@@ -82,7 +77,6 @@ public class DataPacket {
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
-		Log.d("TAG", "Msg encoded to : " + json.toString());
 		return json.toString();
 	}
 	
@@ -100,7 +94,7 @@ public class DataPacket {
 			do {
 				post = new DataPacket(mCursor.getString(2), mCursor.getString(3), mCursor.getString(4), mCursor.getString(5));
 				post.setLocalID(mCursor.getInt(0));
-				post.setCreated(mCursor.getInt(1));
+				post.setCreated(mCursor.getLong(1));
 				posts.add(post);
 			} while (mCursor.moveToNext());
 		}
