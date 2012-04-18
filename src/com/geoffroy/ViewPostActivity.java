@@ -1,6 +1,7 @@
 package com.geoffroy;
 
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.widget.TextView;
@@ -40,10 +41,11 @@ public class ViewPostActivity extends Activity {
 		temp.setText(title);
 		
 		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_author);
-		temp.setText(author);
+		temp.setText(" " + author);
 		
 		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_created);
-		temp.setText(new Date(created).toString());
+		SimpleDateFormat sdf = new SimpleDateFormat("E MMM d, K:m a");
+		temp.setText(" " + sdf.format(new Date(created)));
 		
 		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_message);
 		temp.setText(content);

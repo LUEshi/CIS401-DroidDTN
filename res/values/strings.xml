@@ -46,8 +46,8 @@
     <string name="post_title">Post Title</string>
     
     <!-- post details -->
-    <string name="message_text">Message: </string>
-    <string name="author">By: </string>
-    <string name="created">Created: </string>
+    <string name="message_text">Message:</string>
+    <string name="author">By:</string>
+    <string name="created">Created:</string>
     
 </resources>
