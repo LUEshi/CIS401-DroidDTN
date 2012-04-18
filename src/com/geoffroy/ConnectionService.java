@@ -248,7 +248,11 @@ public class ConnectionService extends Service {
     	String[] vectorArray = vectorString.split(";"); 	
     	for(String arrayEl : vectorArray) {
     		if(arrayEl.length() > 0) {
-    			foreignVector.add(Integer.valueOf(arrayEl));
+    			try {
+    				foreignVector.add(Integer.valueOf(arrayEl));
+    			} catch (NumberFormatException e) {
+    				Log.e(TAG, "Illegal post hash while trying to parse foreign vector: " + arrayEl);
+    			}
     		}
     	}    	
     	// Fetch local messages
