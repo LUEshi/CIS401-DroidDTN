@@ -183,10 +183,6 @@ public class MainAppScreenActivity extends ListActivity {
             cService.setAppHandler(null);
         }
     };
-    
-		//Use this code to refresh the screen when new posts are found
-    //posts = DataPacket.loadAll(db);
-    //dpArrayAdapter.notifyDataSetChanged()
 		
     // The Handler that gets information back from the BluetoothChatService
     class NetworkHandle extends Handler {
@@ -223,9 +219,10 @@ public class MainAppScreenActivity extends ListActivity {
 	                	Log.d(TAG, "Received a message with title" 
 	                			+ newPost.getTitle() + " and body " + newPost.getContent());
 	            		newPost.persist(db);
-	            		update();
-	            		dpArrayAdapter.notifyDataSetChanged();
-	            		// TODO: This currently does not update the UI as it should
+	            		
+	            		// Refresh the screen when new posts are found
+	            	    posts = DataPacket.loadAll(db);
+	            	    dpArrayAdapter.notifyDataSetChanged();
 	                }
 	                Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_LONG).show();

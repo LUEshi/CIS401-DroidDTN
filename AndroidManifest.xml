@@ -17,7 +17,7 @@
       package="com.geoffroy"
       android:versionCode="1"
       android:versionName="1.0">
-    <uses-sdk minSdkVersion="6" />
+    <uses-sdk minSdkVersion="7" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
@@ -31,7 +31,7 @@
                   android:label="@string/select_device"
                   android:configChanges="orientation|keyboardHidden" />
         <activity android:name="MainAppScreenActivity">
-         <intent-filter>
+   <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -41,5 +41,7 @@
         <activity android:name="SettingsActivity"></activity>
     	<activity android:name="MainMenuActivity"></activity>
     	<activity android:name="NewPictureActivity"></activity>
+    	<service  android:name=".ConnectionService" 
+    	    	  android:exported="false" />
 </application>
 </manifest>

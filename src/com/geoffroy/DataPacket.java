@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.database.Cursor;
+import android.util.Log;
 
 public class DataPacket {
 	private long localID;
@@ -81,6 +82,7 @@ public class DataPacket {
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
+		Log.d("TAG", "Msg encoded to : " + json.toString());
 		return json.toString();
 	}
 	

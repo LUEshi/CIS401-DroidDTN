@@ -257,7 +257,7 @@ public class ConnectionService extends Service {
     	for(DataPacket post : posts) {
     		int hash = post.hashCode();
     		if(!foreignVector.contains(hash)) {
-    			toast("The other phone requested packet: " + post.getTitle());
+    			toast("We are sending packet: " + post.getTitle());
     			bService.sendMessage(post.toJson());
     		}
     	}
@@ -265,8 +265,6 @@ public class ConnectionService extends Service {
     	// Send a message to indicate that we've finished sending messages
     	bService.sendMessage(Util.CLOSE_TRANSMISSION_MSG);
     	Log.d(TAG, "Sending out close transmission message.");
-    	// TODO: After sending the last message, send an "ALL DONE" message so 
-    	// the user can disconnect and move on
     }
     
     public void closeConnection() {
