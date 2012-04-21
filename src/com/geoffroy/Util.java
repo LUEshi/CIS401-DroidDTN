@@ -41,6 +41,9 @@ public class Util {
     public static final String POST_TYPE_TEXT = "txt";
     public static final String POST_TYPE_AUDIO = "aud";
     
+    public static final String DB_PACKETS = "db_packets";
+    public static final String DB_DEVICES = "db_devices";
+    
     public static void toast(Handler h, String s) {
     	// Send a message back to the Activity
         Message msg = h.obtainMessage(Util.MESSAGE_TOAST);

@@ -59,9 +59,9 @@ public class DataPacket {
 	
 	public void persist(LocalStorage db) {
 		if(localID > 0)
-			db.update(this);
+			db.update(this, Util.DB_PACKETS);
 		else {
-			long localID = db.insert(this);
+			long localID = db.insert(this, Util.DB_PACKETS);
 			this.setLocalID(localID);
 		}
 	}
@@ -86,7 +86,7 @@ public class DataPacket {
 	}
 	
 	public static ArrayList<DataPacket> loadAll(LocalStorage db) {
-		Cursor mCursor = db.getAll();
+		Cursor mCursor = db.getAll(Util.DB_PACKETS);
 		ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
 		DataPacket post;
 		
