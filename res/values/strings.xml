@@ -33,11 +33,6 @@
     <string name="title_paired_devices">Paired Devices</string>
     <string name="title_other_devices">Other Available Devices</string>
     <string name="button_scan">Scan for devices</string>
-
-    <!-- Options Menu -->
-    <string name="secure_connect">Connect a device - Secure</string>
-    <string name="insecure_connect">Connect a device - Insecure</string>
-    <string name="discoverable">Make discoverable</string>
     
     <!-- misc -->
     <string name="about">About</string>
@@ -47,7 +42,8 @@
     <string name="new_post">Add a Post</string>
     <string name="settings">Settings</string>
     <string name="post_title">Post Title</string>
-    
+    <string name="spam">Mark as Spam</string>
+        
     <!-- post details -->
     <string name="message_text">Message:</string>
     <string name="author">By:</string>

@@ -1,15 +1,17 @@
 package com.geoffroy;
 
-
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.util.Base64;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -80,7 +82,7 @@ public class ViewPostActivity extends Activity {
 		return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 	}
 	
-	public void markAsSpam(View v){
+	public void markAsSpam(){
 		dp.setSpamScore(spamScore+1);
 		if (dp.getSpamScore() == Util.SPAMSCORE_THRESHOLD) {
 			ls.delete(dp.getLocalID(), Util.DB_PACKETS);
@@ -99,5 +101,25 @@ public class ViewPostActivity extends Activity {
 	public String getType() { return type; }
 	public int getSpamScore() { return spamScore; }
 	public boolean getIsVisible() { return isVisible; }
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.post_options_menu, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent i;
+	    // Handle item selection
+	    switch (item.getItemId()) {
+		    case R.id.spam:
+	        	markAsSpam();
+				return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}	
 
 }

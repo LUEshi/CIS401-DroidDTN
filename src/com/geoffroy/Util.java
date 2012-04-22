@@ -44,7 +44,7 @@ public class Util {
     public static final String DEVICE_ADDRESS = "device_address";
     
     // Delay for the ConnectionService timer (in ms)
-    public static final int TIMER_DELAY = 30000;
+    public static final int TIMER_DELAY = 15000;
     
     // Message types
     public static final String POST_TYPE_IMAGE = "img";
@@ -64,8 +64,10 @@ public class Util {
 		SimpleDateFormat sdf = new SimpleDateFormat("H:m:s");
 		String time = sdf.format(System.currentTimeMillis());
 
-    	if(!type.equals(LOG_DEBUG))
-			LOG_ENTRIES.add(time + " - " + type + ": " + log);
+    	if(!type.equals(LOG_DEBUG)) {
+    		String entry = time + " - " + type + ": " + log;
+			LOG_ENTRIES.add(entry);
+    	}
     	
     	if(type.equals(LOG_ERROR))
     		Log.e("", log, e);

@@ -1,5 +1,7 @@
 package com.geoffroy;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
@@ -39,6 +41,7 @@ public class DataPacketArrayAdapter extends ArrayAdapter<DataPacket> {
 			//holder.image=(ImageView) convertView.findViewById(R.id.imageViewEmployer);
 			holder.name =(TextView) convertView.findViewById(R.id.textViewName);
 			holder.address =(TextView) convertView.findViewById(R.id.textViewAddress);
+			holder.date = (TextView) convertView.findViewById(R.id.textViewDate);
 			//set tag of convertView to the holder
 			convertView.setTag(holder);
 		}
@@ -50,6 +53,8 @@ public class DataPacketArrayAdapter extends ArrayAdapter<DataPacket> {
 		//holder.image.setImageResource(R.drawable.user);
 		holder.name.setText((CharSequence) data.get(position).getTitle());
 		holder.address.setText("By: "+(CharSequence) data.get(position).getAuthor());
+		SimpleDateFormat sdf = new SimpleDateFormat("E MMM d, K:m a");
+		holder.date.setText(" " + sdf.format(new Date(data.get(position).getCreated())));
 		
 		return convertView;
 	}
@@ -58,5 +63,6 @@ public class DataPacketArrayAdapter extends ArrayAdapter<DataPacket> {
 		//ImageView image;
 		TextView name;
 		TextView address;
+		TextView date;
 	}
 }

@@ -258,7 +258,7 @@ public class Bluetooth {
 
             // Create a new listening server socket
             try {
-                tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
+                tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME, MY_UUID);
             } catch (IOException e) {
             	Util.log(Util.LOG_DEBUG, "Bluetooth AcceptThread listen() failed.", e);        
             }
@@ -332,7 +332,7 @@ public class Bluetooth {
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
-                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+                tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
             } catch (Exception e) {
             	Util.log(Util.LOG_DEBUG, "Bluetooth ConnectThread create() failed.", e);        
 			}
