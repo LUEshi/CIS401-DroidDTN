@@ -14,29 +14,21 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="vertical"
     android:paddingLeft="10dp"
     android:background="@drawable/background">
-
-    <LinearLayout
-        android:id="@+id/linearLayout1"
+
+    <TextView
+        android:id="@+id/textView1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_weight="0.68"
-        android:orientation="vertical" >
+        android:text="Settings"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="216dp"
-            android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-    </LinearLayout>
-
-	<View   android:id="@+id/firstDivider"
+	<View   
+	    android:id="@+id/firstDivider"
         android:layout_height="2dp"
         android:layout_width="fill_parent"
         android:background="#8E2323" />
@@ -53,8 +45,7 @@
 	        android:layout_width="216dp"
 	        android:layout_height="wrap_content"
 	        android:text="Visible name"
-	        android:textAppearance="?android:attr/textAppearanceLarge" />
-	
+	        android:textAppearance="?android:attr/textAppearanceLarge" />
 	    <EditText
 	        android:id="@+id/editName"
 	        android:layout_width="258dp"
@@ -64,34 +55,18 @@
 	
 	        <requestFocus />
 	    </EditText>
-<!--	
-	    <CheckBox
-	        android:id="@+id/checkBox1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginTop="20dp"
-	        android:text="Favor address book contacts" />
+	</LinearLayout>
 	
-	    <TextView
-	        android:id="@+id/textView2"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginTop="20dp"
-	        android:text="Maximum stored posts"
-	        android:textAppearance="?android:attr/textAppearanceLarge" />
-	
-	    <Spinner
-	        android:id="@+id/spinner1"
-	        android:layout_width="256dp"
-	        android:layout_height="wrap_content"
-	        android:layout_marginLeft="20dp" />
--->
-	
-<Button 
-	android:text="Save" 
-	android:id="@+id/save_settings" 
-	android:layout_width="fill_parent" 
-	android:layout_height="wrap_content"
-	android:onClick="saveAndExit"></Button>
-</LinearLayout>
+	<LinearLayout
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:gravity="center"
+        	android:orientation="horizontal" >
+		<Button 
+			android:text="Save" 
+			android:id="@+id/save_settings" 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content"
+			android:onClick="saveAndExit"></Button>
+	</LinearLayout>
 </LinearLayout>

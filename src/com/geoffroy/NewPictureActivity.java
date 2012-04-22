@@ -77,7 +77,7 @@ public class NewPictureActivity extends Activity {
 	public String encodePicture(String fileName) throws UnsupportedEncodingException{
 		Bitmap bitmap = BitmapFactory.decodeFile(fileName);
 	    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-	    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream); 
+	    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream); 
 	    byte[] byteArray = outputStream.toByteArray();
 	    Base64.encodeToString(byteArray, Base64.DEFAULT);
 	    return Base64.encodeToString(byteArray, Base64.DEFAULT);

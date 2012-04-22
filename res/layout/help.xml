@@ -22,6 +22,7 @@
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="#F2F2F2"
             android:text="DroidDTN is a location-specific blogging application that can allow to you see what others around you are thinking and saying.  It is easy to get started and to share your own thoughts!\n\n1) Set your username in the Settings tab.  This is the name that will appear on your posts.\n\n2) To begin your post, hit 'New Post' at the bottom of the home page screen.\n\n3) Enter your message and hit 'Publish.'\n\n4) Your message will automatically be sent to devices close to you, and you will receive their messages as well.\n\n5) To view a post from someone near you, simply tap on the message.  This will allow you to read the message's content.\n\n6) If you see a message that you believe is innapropriate or spam, please press the 'Mark as Spam' button when viewing the message.  This will remove the message from your message list.  The message will still be passed until enough users mark the message as spam.\n\n7) Have fun!" />
     </LinearLayout>
     
