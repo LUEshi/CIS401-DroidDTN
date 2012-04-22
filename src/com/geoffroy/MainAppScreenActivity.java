@@ -72,11 +72,11 @@ public class MainAppScreenActivity extends ListActivity {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // If the adapter is null, then Bluetooth is not supported
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
+//        if (mBluetoothAdapter == null) {
+//            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+//            finish();
+//            return;
+//        }
 	}
 	
 	@Override
@@ -86,18 +86,18 @@ public class MainAppScreenActivity extends ListActivity {
 		
 		// If BT is not on, request that it be enabled.
         // the connection service will then be called during onActivityResult
-        if (!mBluetoothAdapter.isEnabled()) {
-        	Log.d(TAG, "NO BLUETOOTH");
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent, Util.REQUEST_ENABLE_BT);
-        }
-        else {	// Otherwise, setup the connection service
-        	ensureDiscoverable();
-        	if (cService == null) {
-        		Intent intent = new Intent(this, ConnectionService.class);
-        		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        	}
-        }
+//        if (!mBluetoothAdapter.isEnabled()) {
+//        	Log.d(TAG, "NO BLUETOOTH");
+//            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            startActivityForResult(enableIntent, Util.REQUEST_ENABLE_BT);
+//        }
+//        else {	// Otherwise, setup the connection service
+//        	ensureDiscoverable();
+//        	if (cService == null) {
+//        		Intent intent = new Intent(this, ConnectionService.class);
+//        		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+//        	}
+//        }
 	}
 	
 	@Override
