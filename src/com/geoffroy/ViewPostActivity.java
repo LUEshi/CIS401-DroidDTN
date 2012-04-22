@@ -1,6 +1,7 @@
 package com.geoffroy;
 
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -65,7 +66,13 @@ public class ViewPostActivity extends Activity {
 	}
 	
 	public Bitmap decodeString(String content){
-		byte[] byteArray = content.getBytes();
+		byte[] byteArray=null;
+		try {
+			byteArray = content.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 	}
 	
