@@ -102,7 +102,7 @@ public class ConnectionService extends Service {
         
         // Load the database
         db = new LocalStorage(this);
-        posts = DataPacket.loadAll(db);
+        posts = DataPacket.loadAll(db, false);
    	}
 	
 	@Override
@@ -278,7 +278,7 @@ public class ConnectionService extends Service {
     		}
     	}    	
     	// Fetch local messages
-    	posts = DataPacket.loadAll(db);
+    	posts = DataPacket.loadAll(db, false);
     	// Find missing messages and send them
     	for(DataPacket post : posts) {
     		int hash = post.hashCode();

@@ -13,12 +13,16 @@ import android.os.Bundle;
 
 
 public class ViewPostActivity extends Activity {
+	private LocalStorage ls;
+	private DataPacket dp;
 	private long localID;
 	private long created;
 	private String author;
 	private String title;
 	private String content;
 	private String type;
+	private int spamScore;
+	private boolean isVisible;
 	
 	private TextView temp;
 	
@@ -30,12 +34,15 @@ public class ViewPostActivity extends Activity {
 	    Bundle bun = getIntent().getExtras();
 	    localID = bun.getLong("localID");
 
-	    LocalStorage ls = new LocalStorage(this);
-	    DataPacket dp = ls.getDataPacket(localID);
+	    ls = new LocalStorage(this);
+	    dp = ls.getDataPacket(localID);
 	    title=dp.getTitle();
 	    author=dp.getAuthor();
 	    content=dp.getContent();
 	    type=dp.getType();
+	    spamScore=dp.getSpamScore();
+	    isVisible=dp.getIsVisible();
+	    
 		//initialize view
 		setContentView(R.layout.view_post);
 		
@@ -69,11 +76,20 @@ public class ViewPostActivity extends Activity {
 		return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 	}
 	
+	public void markAsSpam(){
+		dp.setSpamScore(spamScore+1);
+		dp.setIsVisible(false);
+		dp.persist(ls);
+		finish();
+	}
+	
 	public long getLocalID() { return localID; }
 	public long getCreated() { return created; }
 	public String getAuthor() { return author; }
 	public String getPostTitle() { return title; }
 	public String getContent() { return content; }
 	public String getType() { return type; }
+	public int getSpamScore() { return spamScore; }
+	public boolean getIsVisible() { return isVisible; }
 
 }

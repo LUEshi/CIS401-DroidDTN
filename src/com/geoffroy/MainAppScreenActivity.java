@@ -58,7 +58,7 @@ public class MainAppScreenActivity extends ListActivity {
 	    setContentView(R.layout.select_post);
 	    
 	    db = new LocalStorage(this);
-        posts = DataPacket.loadAll(db);
+        posts = DataPacket.loadAll(db, true);
         
 		// Bind to our new adapter.
         dpArrayAdapter = new DataPacketArrayAdapter(this, posts);
@@ -106,7 +106,7 @@ public class MainAppScreenActivity extends ListActivity {
 		super.onResume();
 		Log.e(TAG, "+ ON RESUME +");
 		
-		posts = DataPacket.loadAll(db);
+		posts = DataPacket.loadAll(db, true);
 		setListAdapter(new DataPacketArrayAdapter(this,posts));
 
 		// TODO: Figure out if this code is necessary
@@ -319,7 +319,7 @@ public class MainAppScreenActivity extends ListActivity {
 	}
 	
 	// Reload posts
-	public void update(){ posts = DataPacket.loadAll(db); }
+	public void update(){ posts = DataPacket.loadAll(db, true); }
 	
 	
 	@Override  
