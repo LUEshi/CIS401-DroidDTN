@@ -61,11 +61,11 @@ public class ViewPostActivity extends Activity {
 		
 		
 		if(type.equals(Util.POST_TYPE_IMAGE)){
-			ImageView temp2=(ImageView)this.findViewById(com.geoffroy.R.id.view_picture);
+			/*ImageView temp2=(ImageView)this.findViewById(com.geoffroy.R.id.view_picture);
 			Bitmap b = BitmapFactory.decodeFile("/mnt/sdcard/media/images/2.bmp");
 			Bitmap b2 = decodeString(content);
 			
-			temp2.setImageBitmap(b);
+			temp2.setImageBitmap(b);*/
 		}
 		else{
 			temp=(TextView)this.findViewById(com.geoffroy.R.id.view_message);

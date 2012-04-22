@@ -211,11 +211,12 @@ public class MainAppScreenActivity extends ListActivity {
 	        		// since the service timer will get clean things up
 	        		break;
 	        	case Util.MESSAGE_READ:
-	        		byte[] readBuf = (byte[]) msg.obj;
+	        		/*byte[] readBuf = (byte[]) msg.obj;
 	        		if(readBuf == null)
 	        			break;
 	                // construct a string from the valid bytes in the buffer
-	                String readMessage = new String(readBuf, 0, msg.arg1);
+	                String readMessage = new String(readBuf, 0, msg.arg1);*/
+	        		String readMessage = (String) msg.obj;
 	                Log.d(TAG, "RECEIVED A MSG: " + readMessage);
 	                if(readMessage.startsWith(Util.COMPARISON_VECTOR_MSG)) {
 	                	cService.transferData(readMessage.substring(
@@ -301,16 +302,25 @@ public class MainAppScreenActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.settings_menu, menu);
+	    inflater.inflate(R.menu.options_menu, menu);
 	    return true;
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent i;
 	    // Handle item selection
 	    switch (item.getItemId()) {
+		    case R.id.about:
+	        	i = new Intent(this, AboutScreenActivity.class);
+				startActivity(i);
+				return true;
+		    case R.id.help:
+	        	i = new Intent(this, HelpScreenActivity.class);
+				startActivity(i);
+				return true;
 	        case R.id.settings:
-	        	Intent i = new Intent(this, SettingsActivity.class);
+	        	i = new Intent(this, SettingsActivity.class);
 				startActivity(i);
 				return true;
 	        default:

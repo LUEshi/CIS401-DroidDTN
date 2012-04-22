@@ -200,6 +200,8 @@ public class Bluetooth {
 
         // Check that there's actually something to send
         if (message.length() > 0) {
+        	// Wrap the message
+        	message = "<msg>" + message + "</msg>";
             // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
             write(send);
@@ -410,22 +412,42 @@ public class Bluetooth {
 
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
-            byte[] buffer = new byte[1024];
-            int bytes;
+            //byte[] buffer = new byte[1024];
+            //int bytes;
+            byte ch;
+        	String msgString = "";
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
+                    //bytes = mmInStream.read(buffer);
+                	
+                	
+                	ch = (byte) mmInStream.read();
+            		msgString += (char) ch;
+            		Log.d(TAG, "Read a byte: " + ch + "; msg: " + msgString);
+            		
+            		if(msgString.indexOf("</msg>") > -1) {
+            			msgString = msgString.replaceFirst("<msg>", "");
+            			msgString = msgString.replaceFirst("</msg>", "");
+            			Message msg = appHandler.obtainMessage(Util.MESSAGE_READ, -1, -1, msgString);
+                        Bundle bundle = new Bundle();
+                        bundle.putString(Util.DEVICE_ADDRESS, 
+                        		mmSocket.getRemoteDevice().getAddress());
+                        msg.setData(bundle);
+                        appHandler.sendMessage(msg);
+                        
+                        msgString = "";
+            		}
 
                     // Send the obtained bytes to the UI Activity
-                    Message msg = appHandler.obtainMessage(Util.MESSAGE_READ, bytes, -1, buffer);
+                    /*Message msg = appHandler.obtainMessage(Util.MESSAGE_READ, bytes, -1, buffer);
                     Bundle bundle = new Bundle();
                     bundle.putString(Util.DEVICE_ADDRESS, 
                     		mmSocket.getRemoteDevice().getAddress());
                     msg.setData(bundle);
-                    appHandler.sendMessage(msg);
+                    appHandler.sendMessage(msg);*/
                     
                     
                 } catch (IOException e) {
