@@ -195,14 +195,21 @@ public class MainAppScreenActivity extends ListActivity {
 	                Toast.makeText(getApplicationContext(), msg.getData().getString(Util.TOAST),
 	                               Toast.LENGTH_SHORT).show();
 	                break;
-	        	case Util.MESSAGE_NO_CONNECTION:
+	        	case Util.MESSAGE_FAILED_CONNECTION:
+	        		// Update the connection history of the connecting device
+	        		// to reflect this failed connection attempt
+	                try {
+	                	Log.d(TAG, "Fetching a record to fail++ at address " + msg.getData().getString(Util.DEVICE_ADDRESS));
+						DeviceRecord record = DeviceRecord.load(
+								Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
+						record.setFailedConn(record.getFailedConn() + 1);
+						record.setLastConnection(System.currentTimeMillis());
+						record.persist(db);
+					} catch (Exception e) {
+						Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+					}
 	        		// We currently do nothing if a connection fails or is lost,
 	        		// since the service timer will get clean things up
-	        		break;
-	        	case Util.MESSAGE_STATE_CHANGE:
-	        		if(msg.arg1 == Util.STATE_CONNECTED) {
-	        			cService.handshake();
-	        		}
 	        		break;
 	        	case Util.MESSAGE_READ:
 	        		byte[] readBuf = (byte[]) msg.obj;
@@ -235,14 +242,42 @@ public class MainAppScreenActivity extends ListActivity {
 							Log.e(TAG, e.getMessage());
 							break;
 						}
+						
+						// Update the connection history of the connecting device
+		        		// to reflect this received message
+		                try {
+		                	Log.d(TAG, "Fetching a record to msg++ at address " + msg.getData().getString(Util.DEVICE_ADDRESS));
+							DeviceRecord record = DeviceRecord.load(
+									Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
+							record.setMessagesReceived(record.getMessagesReceived() + 1);
+							record.persist(db);
+						} catch (Exception e) {
+							Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+						}
 	                }
 	                Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_LONG).show();
 	                break;
-	        	case Util.MESSAGE_DEVICE_NAME:
+	        	case Util.MESSAGE_CONNECTION_ESTABLISHED:
 	        		Toast.makeText(getApplicationContext(), "Connected to "
                             + msg.getData().getString(Util.DEVICE_NAME), 
                             Toast.LENGTH_SHORT).show();
+	        		
+	        		// Update the connection history of the connecting device
+	        		// to reflect this successful connection attempt
+	                try {
+	                	Log.d(TAG, "Fetching a record to succ++ at address " + msg.getData().getString(Util.DEVICE_ADDRESS));
+						DeviceRecord record = DeviceRecord.load(
+								Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
+						record.setSuccessfulConn(record.getSuccessfulConn() + 1);
+						record.setLastConnection(System.currentTimeMillis());
+						record.persist(db);
+					} catch (Exception e) {
+						Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+					}
+	        		
+					// Initiate a handshake
+					cService.handshake();
 	        		break;
 	        	case Util.MESSAGE_REQUEST_DISCOVERABLE:
 	        		ensureDiscoverable();

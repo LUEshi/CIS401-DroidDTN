@@ -1,6 +1,7 @@
 package com.geoffroy;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,9 +69,9 @@ public class DataPacket {
 	
 	public void persist(LocalStorage db) {
 		if(localID > 0)
-			db.update(this);
+			db.update(this, Util.DB_PACKETS);
 		else {
-			long localID = db.insert(this);
+			long localID = db.insert(this, Util.DB_PACKETS);
 			this.setLocalID(localID);
 		}
 	}
@@ -95,7 +96,7 @@ public class DataPacket {
 	}
 	
 	public static ArrayList<DataPacket> loadAll(LocalStorage db) {
-		Cursor mCursor = db.getAll();
+		Cursor mCursor = db.getAll(Util.DB_PACKETS);
 		ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
 		DataPacket post;
 		
@@ -134,5 +135,17 @@ public class DataPacket {
 			}
 		}
 		return missingPosts;
+	}
+	
+	public static String packetsToString(LocalStorage db) {
+		ArrayList<DataPacket> packets = loadAll(db);
+        String s = "";
+        DataPacket packet;
+        Iterator<DataPacket> i = packets.iterator();
+        while(i.hasNext()) {
+        	packet = i.next();
+        	s += "localID: " + packet.getLocalID() + " author: " + packet.getAuthor() + " title: " + packet.getTitle() + " content: " + packet.getContent() + " type: " + packet.getType() + "\n";
+        }
+        return s;
 	}
 }

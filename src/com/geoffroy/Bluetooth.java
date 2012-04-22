@@ -149,8 +149,9 @@ public class Bluetooth {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = appHandler.obtainMessage(Util.MESSAGE_DEVICE_NAME);
+        Message msg = appHandler.obtainMessage(Util.MESSAGE_CONNECTION_ESTABLISHED);
         Bundle bundle = new Bundle();
+        bundle.putString(Util.DEVICE_ADDRESS, device.getAddress());
         bundle.putString(Util.DEVICE_NAME, device.getName());
         msg.setData(bundle);
         appHandler.sendMessage(msg);
@@ -181,9 +182,10 @@ public class Bluetooth {
         synchronized (this) {
             if (mState != Util.STATE_CONNECTED) return;
             r = mConnectedThread;
+            r.write(out);
         }
         // Perform the write unsynchronized
-        r.write(out);
+        //r.write(out);
     }
     
     /**
@@ -208,11 +210,16 @@ public class Bluetooth {
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
      */
-    private void connectionFailed(Exception e) {
+    private void connectionFailed(Exception e, String device) {
         setState(Util.STATE_LISTEN);
 
-        // Send a failure message back to the Activity
-        appHandler.obtainMessage(Util.MESSAGE_NO_CONNECTION, -1, -1).sendToTarget();
+        // Send a failure message back to the Activity        
+        Message msg = appHandler.obtainMessage(Util.MESSAGE_FAILED_CONNECTION);
+        Bundle bundle = new Bundle();
+        bundle.putString(Util.DEVICE_ADDRESS, device);
+        msg.setData(bundle);
+        appHandler.sendMessage(msg);
+        
         toast("Unable to connect device: " + e.getMessage());
         Log.d(TAG, "Unable to connect device:" + e.getMessage());
         StackTraceElement[] st = e.getStackTrace();
@@ -228,7 +235,7 @@ public class Bluetooth {
         setState(Util.STATE_LISTEN);
 
         // Send a failure message back to the Activity
-        appHandler.obtainMessage(Util.MESSAGE_NO_CONNECTION, -1, -1).sendToTarget();
+        appHandler.obtainMessage(Util.MESSAGE_LOST_CONNECTION, -1, -1).sendToTarget();
         toast("Device connection was lost:" + e.getMessage());
     }
 
@@ -342,7 +349,7 @@ public class Bluetooth {
                 // successful connection or an exception
                 mmSocket.connect();
             } catch (IOException e) {
-                connectionFailed(e);
+                connectionFailed(e, mmDevice.getAddress());
                 // Close the socket
                 try {
                     mmSocket.close();
@@ -414,8 +421,14 @@ public class Bluetooth {
                     bytes = mmInStream.read(buffer);
 
                     // Send the obtained bytes to the UI Activity
-                    appHandler.obtainMessage(Util.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    Message msg = appHandler.obtainMessage(Util.MESSAGE_READ, bytes, -1, buffer);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(Util.DEVICE_ADDRESS, 
+                    		mmSocket.getRemoteDevice().getAddress());
+                    msg.setData(bundle);
+                    appHandler.sendMessage(msg);
+                    
+                    
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost(e);
