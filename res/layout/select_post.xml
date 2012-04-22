@@ -25,39 +25,44 @@
         android:layout_width="fill_parent"
        	android:layout_height="fill_parent"
        	android:layout_weight="1"
-       	android:drawSelectorOnTop="false"/>w>
+       	android:drawSelectorOnTop="false"/>
     
     <TextView android:id="@android:id/empty"
                android:layout_width="fill_parent"
-               android:text="You currently have no posts to view.  Try posting something for other people to see!" 
-               android:layout_height="wrap_content"/>
-
-    <LinearLayout
+               android:text="You currently have no posts to view.  Try posting something for other people to see!\n\n\n" 
+               android:layout_height="wrap_content"/>
+    <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/Button01"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onNewPostClick"
-            android:text="New Post" />
+		android:layout_height="wrap_content">
         
-        <Button
-            android:id="@+id/Button02"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onNewPictureClick"
-            android:text="New Picture" />
+        <LinearLayout
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:gravity="center"
+        	android:orientation="horizontal" >
 
-    </LinearLayout>
-        
-    <ImageView
-		    android:src="@drawable/full_logo"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
- 			android:contentDescription="Logo"/>
+        	<Button
+	            android:id="@+id/Button01"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:onClick="onNewPostClick"
+	            android:text="New Post" />
+	        
+	        <Button
+	            android:id="@+id/Button02"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:onClick="onNewPictureClick"
+	            android:text="New Picture" />
+	
+	    </LinearLayout>
+	        
+	    <ImageView
+			    android:src="@drawable/full_logo"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+	 			android:contentDescription="Logo"
+	 			android:layout_alignParentBottom="true"/>
+	</RelativeLayout>
 
 </LinearLayout>
