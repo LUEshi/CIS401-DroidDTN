@@ -38,7 +38,7 @@ public class DataPacketArrayAdapter extends ArrayAdapter<DataPacket> {
 			//get new ViewHolder
 			holder =new ViewHolder();
 			//get all item in ListView item to corresponding fields in our ViewHolder class
-			//holder.image=(ImageView) convertView.findViewById(R.id.imageViewEmployer);
+			holder.image=(ImageView) convertView.findViewById(R.id.img);
 			holder.name =(TextView) convertView.findViewById(R.id.textViewName);
 			holder.address =(TextView) convertView.findViewById(R.id.textViewAddress);
 			holder.date = (TextView) convertView.findViewById(R.id.textViewDate);
@@ -50,7 +50,8 @@ public class DataPacketArrayAdapter extends ArrayAdapter<DataPacket> {
 			holder =(ViewHolder) convertView.getTag();
 		}      
 		
-		//holder.image.setImageResource(R.drawable.user);
+		if(data.get(position).getType().equals(Util.POST_TYPE_IMAGE))
+			holder.image.setImageResource(R.drawable.clip);
 		holder.name.setText((CharSequence) data.get(position).getTitle());
 		holder.address.setText("By: "+(CharSequence) data.get(position).getAuthor());
 		SimpleDateFormat sdf = new SimpleDateFormat("E MMM d, K:m a");
@@ -60,7 +61,7 @@ public class DataPacketArrayAdapter extends ArrayAdapter<DataPacket> {
 	}
 	//ViewHolder class that hold over ListView Item
 	static class ViewHolder{
-		//ImageView image;
+		ImageView image;
 		TextView name;
 		TextView address;
 		TextView date;
