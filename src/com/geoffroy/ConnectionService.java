@@ -5,6 +5,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -287,8 +289,18 @@ public class ConnectionService extends Service {
     	}
     	
     	// Send a message to indicate that we've finished sending messages
-    	bService.sendMessage(Util.CLOSE_TRANSMISSION_MSG);
-    	Log.d(TAG, "Sending out close transmission message.");
+    	final Handler handler = new Handler(); 
+        Timer t = new Timer(); 
+        t.schedule(new TimerTask() { 
+			public void run() { 
+		        handler.post(new Runnable() { 
+	                public void run() { 
+	                	bService.sendMessage(Util.CLOSE_TRANSMISSION_MSG);
+	                	Log.d(TAG, "Sending out close transmission message.");
+	                } 
+		        }); 
+			} 
+        }, 3000); 
     }
     
     public void closeConnection() {
