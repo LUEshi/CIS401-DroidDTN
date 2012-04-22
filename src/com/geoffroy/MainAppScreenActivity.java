@@ -58,7 +58,7 @@ public class MainAppScreenActivity extends ListActivity {
 	    setContentView(R.layout.select_post);
 	    
 	    db = new LocalStorage(this);
-        posts = DataPacket.loadAll(db);
+        posts = DataPacket.loadAll(db, true);
         
 		// Bind to our new adapter.
         dpArrayAdapter = new DataPacketArrayAdapter(this, posts);
@@ -106,7 +106,7 @@ public class MainAppScreenActivity extends ListActivity {
 		super.onResume();
 		Log.e(TAG, "+ ON RESUME +");
 		
-		posts = DataPacket.loadAll(db);
+		posts = DataPacket.loadAll(db, true);
 		setListAdapter(new DataPacketArrayAdapter(this,posts));
 
 		// TODO: Figure out if this code is necessary
@@ -199,7 +199,6 @@ public class MainAppScreenActivity extends ListActivity {
 	        		// Update the connection history of the connecting device
 	        		// to reflect this failed connection attempt
 	                try {
-	                	Log.d(TAG, "Fetching a record to fail++ at address " + msg.getData().getString(Util.DEVICE_ADDRESS));
 						DeviceRecord record = DeviceRecord.load(
 								Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
 						record.setFailedConn(record.getFailedConn() + 1);
@@ -217,6 +216,7 @@ public class MainAppScreenActivity extends ListActivity {
 	        			break;
 	                // construct a string from the valid bytes in the buffer
 	                String readMessage = new String(readBuf, 0, msg.arg1);
+	                Log.d(TAG, "RECEIVED A MSG: " + readMessage);
 	                if(readMessage.startsWith(Util.COMPARISON_VECTOR_MSG)) {
 	                	cService.transferData(readMessage.substring(
 	                			Util.COMPARISON_VECTOR_MSG.length() + 1));
@@ -230,13 +230,14 @@ public class MainAppScreenActivity extends ListActivity {
 						try {
 							newPost = new DataPacket(readMessage);
 							
-							Log.d(TAG, "Received a message with title" 
+							Log.d(TAG, "Received a message with title " 
 		                			+ newPost.getTitle() + " and body " + newPost.getContent());
 		            		newPost.persist(db);
 		            		
 		            		// Refresh the screen when new posts are found
-		            	    posts = DataPacket.loadAll(db);
-		            	    dpArrayAdapter.notifyDataSetChanged();
+		            	    //posts = DataPacket.loadAll(db);
+		            	    dpArrayAdapter.add(newPost);
+		            		dpArrayAdapter.notifyDataSetChanged();
 						} catch (JSONException e) {
 							Log.e(TAG, "Received a post that could not be parsed: " + readMessage);
 							Log.e(TAG, e.getMessage());
@@ -246,7 +247,6 @@ public class MainAppScreenActivity extends ListActivity {
 						// Update the connection history of the connecting device
 		        		// to reflect this received message
 		                try {
-		                	Log.d(TAG, "Fetching a record to msg++ at address " + msg.getData().getString(Util.DEVICE_ADDRESS));
 							DeviceRecord record = DeviceRecord.load(
 									Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
 							record.setMessagesReceived(record.getMessagesReceived() + 1);
@@ -266,7 +266,6 @@ public class MainAppScreenActivity extends ListActivity {
 	        		// Update the connection history of the connecting device
 	        		// to reflect this successful connection attempt
 	                try {
-	                	Log.d(TAG, "Fetching a record to succ++ at address " + msg.getData().getString(Util.DEVICE_ADDRESS));
 						DeviceRecord record = DeviceRecord.load(
 								Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
 						record.setSuccessfulConn(record.getSuccessfulConn() + 1);
@@ -320,7 +319,7 @@ public class MainAppScreenActivity extends ListActivity {
 	}
 	
 	// Reload posts
-	public void update(){ posts = DataPacket.loadAll(db); }
+	public void update(){ posts = DataPacket.loadAll(db, true); }
 	
 	
 	@Override  

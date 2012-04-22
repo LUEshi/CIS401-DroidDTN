@@ -46,6 +46,8 @@ public class LocalStorage {
 			values.put("title", packet.getTitle());
 			values.put("content", packet.getContent());
 			values.put("type", packet.getType());
+			values.put("spamScore", packet.getSpamScore());
+			values.put("isVisible", packet.getIsVisible());
 			return db.insert(TABLE_PACKETS, null, values);		
 		} else if(table == Util.DB_DEVICES) {
 			DeviceRecord record = (DeviceRecord)data;
@@ -84,6 +86,8 @@ public class LocalStorage {
 			values.put("title", packet.getTitle());
 			values.put("content", packet.getContent());
 			values.put("type", packet.getType());
+			values.put("spamScore", packet.getSpamScore());
+			values.put("isVisible", packet.getIsVisible());
 			return db.update(TABLE_PACKETS, values, "localID" + "=" + packet.getLocalID(), null) > 0;
 		} else if(table == Util.DB_DEVICES) {
 			DeviceRecord record = (DeviceRecord)data;
@@ -106,7 +110,7 @@ public class LocalStorage {
 		
 		if(table == Util.DB_PACKETS) {
 			mCursor = db.query(true, TABLE_PACKETS, 
-					new String[] {"localID", "created", "author", "title", "content", "type"}, 
+					new String[] {"localID", "created", "author", "title", "content", "type", "spamScore", "isVisible"}, 
 					"localID" + "=" + ID, null, null, null, null, null);
 		} else if(table == Util.DB_DEVICES) {
 			mCursor = db.query(true, TABLE_DEVICES, 
@@ -125,7 +129,7 @@ public class LocalStorage {
 
 	public DataPacket getDataPacket(long ID) throws SQLException{
 		Cursor mCursor = db.query(true, TABLE_PACKETS, 
-				new String[] {"localID", "created", "author", "title", "content", "type"}, 
+				new String[] {"localID", "created", "author", "title", "content", "type", "spamScore", "isVisible"}, 
 				"localID" + "=" + ID, null, null, null, null, null);
 	
 		if(mCursor != null) {
@@ -138,6 +142,8 @@ public class LocalStorage {
 		d.setTitle(mCursor.getString(mCursor.getColumnIndex("title")));
 		d.setContent(mCursor.getString(mCursor.getColumnIndex("content")));
 		d.setType(mCursor.getString(mCursor.getColumnIndex("type")));
+		d.setSpamScore(mCursor.getInt(mCursor.getColumnIndex("spamScore")));
+		d.setIsVisible(mCursor.getInt(mCursor.getColumnIndex("isVisible"))==1);
 		return d;
 	}
 	
@@ -149,7 +155,7 @@ public class LocalStorage {
 		
 		if(table == Util.DB_PACKETS) {
 			mCursor = db.query(true, TABLE_PACKETS, 
-					new String[] {"localID", "created", "author", "title", "content", "type"}, 
+					new String[] {"localID", "created", "author", "title", "content", "type", "spamScore", "isVisible"}, 
 					"localID" + "=" + ID, null, null, null, null, null);
 		} else if(table == Util.DB_DEVICES) {
 			mCursor = db.query(true, TABLE_DEVICES, 
@@ -170,6 +176,9 @@ public class LocalStorage {
 					post.put("title",mCursor.getString(mCursor.getColumnIndex("title")));
 					post.put("content",mCursor.getString(mCursor.getColumnIndex("content")));
 					post.put("type", mCursor.getString(mCursor.getColumnIndex("type")));
+					post.put("spamScore", String.valueOf(mCursor.getInt(mCursor.getColumnIndex("spamScore"))));
+					post.put("isVisible", String.valueOf(mCursor.getInt(mCursor.getColumnIndex("isVisible"))==1));
+					
 				} else if(table == Util.DB_DEVICES) {
 					post.put("localID", new Integer(mCursor.getInt(mCursor.getColumnIndex("localID"))).toString());
 					post.put("address",mCursor.getString(mCursor.getColumnIndex("address")));
@@ -195,7 +204,7 @@ public class LocalStorage {
 		
 		if(table == Util.DB_PACKETS) {
 			return db.query(TABLE_PACKETS, 
-					new String[] {"localID", "created", "author", "title", "content", "type"}, 
+					new String[] {"localID", "created", "author", "title", "content", "type", "spamScore", "isVisible"}, 
 					null, null, null, null, null);
 		} else if(table == Util.DB_DEVICES) {
 			return db.query(TABLE_DEVICES,
@@ -222,7 +231,9 @@ public class LocalStorage {
 	    			"author TEXT, " +
 	    			"title TEXT, " +
 	    			"content TEXT, " +
-	    			"type TEXT);");
+	    			"type TEXT, " +
+	    			"spamScore INTEGER, " +
+	    			"isVisible BOOLEAN);");
 			db.execSQL("CREATE TABLE " + TABLE_DEVICES + " (" +
 					"localID INTEGER PRIMARY KEY, " + 
 	    			"address TEXT, " +

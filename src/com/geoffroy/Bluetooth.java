@@ -182,10 +182,9 @@ public class Bluetooth {
         synchronized (this) {
             if (mState != Util.STATE_CONNECTED) return;
             r = mConnectedThread;
-            r.write(out);
         }
         // Perform the write unsynchronized
-        //r.write(out);
+        r.write(out);
     }
     
     /**

@@ -15,6 +15,8 @@ public class DataPacket {
 	private String title;
 	private String content;
 	private String type;
+	private int spamScore;
+	private boolean isVisible;
 	
 	/*
 	 * Default constructor
@@ -26,15 +28,19 @@ public class DataPacket {
 		this.title = "";
 		this.content = "";
 		this.type = "";
+		this.spamScore = 0;
+		this.isVisible = true;
 	}
 	
-	public DataPacket(String author, String title, String content, String type) {
+	public DataPacket(String author, String title, String content, String type, int spamScore, boolean isVisible) {
 		this.localID = 0;
 		this.created = System.currentTimeMillis();
 		this.author = author;
 		this.title = title;
 		this.content = content;
 		this.type = type;
+		this.spamScore = spamScore;
+		this.isVisible = isVisible;
 	}
 	
 	/*
@@ -47,6 +53,8 @@ public class DataPacket {
 		this.title = json.getString("title");
 		this.content = json.getString("content");
 		this.type = json.getString("type");
+		this.spamScore = json.getInt("spamScore");
+		this.isVisible = json.getBoolean("isVisible");
 	}
 
 	public long getLocalID() {	return localID;	}
@@ -61,6 +69,10 @@ public class DataPacket {
 	public void setContent(String content) {	this.content = content;	}
 	public String getType() {	return type;	}
 	public void setType(String type) {	this.type = type;	}
+	public int getSpamScore() { return spamScore; }
+	public void setSpamScore(int spamScore) { this.spamScore = spamScore; }
+	public boolean getIsVisible() { return this.isVisible; }
+	public void setIsVisible(boolean isVisible) { this.isVisible = isVisible; }
 	
 	public int hashCode() {
 		String s = String.valueOf(created) + author + title;
@@ -84,28 +96,27 @@ public class DataPacket {
 			json.put("title", this.title);
 			json.put("content", this.content);
 			json.put("type", this.type);
+			json.put("spamScore", this.spamScore);
+			json.put("isVisible", this.isVisible);
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
 		return json.toString();
 	}
 	
-	private static String getCurrentAuthor() {
-		/* Use Android SharedPreferences to persist the author. */
-		return null;
-	}
-	
-	public static ArrayList<DataPacket> loadAll(LocalStorage db) {
+	public static ArrayList<DataPacket> loadAll(LocalStorage db, boolean onlyVisible) {
 		Cursor mCursor = db.getAll(Util.DB_PACKETS);
 		ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
 		DataPacket post;
 		
 		if(mCursor.moveToFirst()) {
 			do {
-				post = new DataPacket(mCursor.getString(2), mCursor.getString(3), mCursor.getString(4), mCursor.getString(5));
+				post = new DataPacket(mCursor.getString(2), mCursor.getString(3), mCursor.getString(4),
+									  mCursor.getString(5), mCursor.getInt(6), mCursor.getInt(7)==1);
 				post.setLocalID(mCursor.getInt(0));
 				post.setCreated(mCursor.getLong(1));
-				posts.add(post);
+				if (!onlyVisible || post.getIsVisible())
+					posts.add(post);
 			} while (mCursor.moveToNext());
 		}
 		
@@ -113,7 +124,7 @@ public class DataPacket {
 	}
 	
 	public static ArrayList<Integer> getBlogComparisonVector(LocalStorage db) {
-		ArrayList<DataPacket> posts = loadAll(db);
+		ArrayList<DataPacket> posts = loadAll(db, false);
 		ArrayList<Integer> vector = new ArrayList<Integer>();
 		
 		for(DataPacket post : posts) {
@@ -138,13 +149,15 @@ public class DataPacket {
 	}
 	
 	public static String packetsToString(LocalStorage db) {
-		ArrayList<DataPacket> packets = loadAll(db);
+		ArrayList<DataPacket> packets = loadAll(db, false);
         String s = "";
         DataPacket packet;
         Iterator<DataPacket> i = packets.iterator();
         while(i.hasNext()) {
         	packet = i.next();
-        	s += "localID: " + packet.getLocalID() + " author: " + packet.getAuthor() + " title: " + packet.getTitle() + " content: " + packet.getContent() + " type: " + packet.getType() + "\n";
+        	s += "localID: " + packet.getLocalID() + " author: " + packet.getAuthor() + " title: " + packet.getTitle() +
+        		 " content: " + packet.getContent() + " type: " + packet.getType() + " spamScore: " + packet.getSpamScore() +
+        		 " isVisible: " + packet.getIsVisible() + "\n";
         }
         return s;
 	}
