@@ -82,6 +82,10 @@ public class ViewPostActivity extends Activity {
 	
 	public void markAsSpam(View v){
 		dp.setSpamScore(spamScore+1);
+		if (dp.getSpamScore() == Util.SPAMSCORE_THRESHOLD) {
+			ls.delete(dp.getLocalID(), Util.DB_PACKETS);
+			finish();
+		}
 		dp.setIsVisible(false);
 		dp.persist(ls);
 		finish();

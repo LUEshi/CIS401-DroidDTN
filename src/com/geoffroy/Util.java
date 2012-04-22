@@ -5,6 +5,9 @@ import android.os.Handler;
 import android.os.Message;
 
 public class Util {
+	// Spam score threshold
+    public static final int SPAMSCORE_THRESHOLD = 5;
+    
     // Message types sent from the NetworkHandle Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
