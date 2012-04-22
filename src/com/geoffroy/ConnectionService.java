@@ -1,7 +1,5 @@
 package com.geoffroy;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,12 +18,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 
 public class ConnectionService extends Service {
 
-	// Debugging
-    private static final String TAG = "DroidDTN - ConnectionService";
 	// Binder given to clients to allow interaction
     private final IBinder mBinder = new LocalBinder();
     // Handler received from application to allow messaging
@@ -127,7 +122,7 @@ public class ConnectionService extends Service {
 	private Runnable timerTask = new Runnable() {
 		public void run() {
 			if(bService.getState() == Util.STATE_NONE || bService.getState() == Util.STATE_LISTEN) {
-				toast("Timer triggered bService start and scan().");
+            	Util.log(Util.LOG_INFO, "Timer trigerred ConnectionService execution.", null);        
 				bService.start();
 				scan();
 			}
@@ -142,8 +137,10 @@ public class ConnectionService extends Service {
 	 * turns on the service timer, and initiates a first scan.
 	 */
 	public void start() {
-        toast("start()");
-        // Start the Bluetooth helper instance
+    	Util.log(Util.LOG_INFO, "ConnectionService started; " +
+    			"initiating a scan.", null);
+
+    	// Start the Bluetooth helper instance
         if(bService != null && bService.getState() == Util.STATE_NONE)
         	bService.start();
         
@@ -165,8 +162,9 @@ public class ConnectionService extends Service {
      * valid device.
      */
     public void scan() {
-        Log.d(TAG, "scan()");
-
+    	Util.log(Util.LOG_INFO, "ConnectionService is scanning " +
+    			"for nearby devices.", null);
+    	
         // If we're already discovering, stop it
         if (mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
@@ -181,11 +179,13 @@ public class ConnectionService extends Service {
      * Connects with an available device.
      */
     public void connect() {
-    	toast("connect()");
+    	Util.log(Util.LOG_INFO, "ConnectionService seeking to establish " +
+    			"a connection.", null);
 
     	// Make sure there are actually devices to connect to, or exit
     	if(devices.size() < 1) {
-    		Log.e(TAG, "We're attempting to connect but there are no connectable devices...");
+    		Util.log(Util.LOG_DEBUG, "ConnectionService connect() has no " +
+    				"connectable devices.", null);
     		return;
     	}
     	
@@ -200,7 +200,9 @@ public class ConnectionService extends Service {
 		try {
 			connDeviceAddress = DeviceRecord.selectBestDevice(deviceAddresses, db);
 		} catch (Exception e) {
-			Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+			Util.log(Util.LOG_ERROR, "Unable to encrypt the MAC " +
+        			"address of the connecting device - no " +
+        			"connection history will be stored.", null);
 			connDeviceAddress = devices.get(0).getAddress();
 		}
     	BluetoothDevice connDevice = mBtAdapter.getRemoteDevice(connDeviceAddress);
@@ -212,8 +214,6 @@ public class ConnectionService extends Service {
 			bService.connect(connDevice);
     	}
     	
-    	// TODO: Change the following logic, which currently hard-codes the
-    	// MAC address of our test phone
     	/*Iterator<BluetoothDevice> i = devices.iterator();
     	while(i.hasNext()) {
     		BluetoothDevice d = i.next();
@@ -235,12 +235,12 @@ public class ConnectionService extends Service {
      * Perform a handshake with a connected device. Sends a message with the 
      * COMPARISON_VECTOR_MSG header followed by the local blog comparison vector.
      */
-    public void handshake() {
-    	toast("handshake()");
+    public void handshake() {    	
     	// Check that we're actually connected before trying anything
         if (bService.getState() != Util.STATE_CONNECTED) {
-        	toast("You are not connected to a device and cannot perform a handshake.");
-            return;
+        	Util.log(Util.LOG_DEBUG, "ConnectionService connect() has no " +
+    				"connectable devices.", null);
+        	return;
         }
         
     	// Get the local blog comparison vector and package it to a string
@@ -248,7 +248,8 @@ public class ConnectionService extends Service {
     	String msg = Util.COMPARISON_VECTOR_MSG + " " + TextUtils.join(";", localVector);
     	// Send the local vector
     	bService.sendMessage(msg);
-    	Log.d(TAG, "Sending out comparison message: " + msg);
+    	Util.log(Util.LOG_INFO, "ConnectionService is performing a handshake and " +
+    			"sending out the following comparison message: " + msg, null);
     }
 	
     /**
@@ -259,11 +260,13 @@ public class ConnectionService extends Service {
      * connection can be safely shut off.
      */
     public void transferData(String vectorString) {
-    	toast("transferData()");
+    	Util.log(Util.LOG_DEBUG, "ConnectionService is transferring data.", null);
+    	
     	// Check that we're actually connected before trying anything
         if (bService.getState() != Util.STATE_CONNECTED) {
-        	toast("You are not connected to a device and cannot perform a handshake.");
-            return;
+        	Util.log(Util.LOG_DEBUG, "ConnectionService connect() has no " +
+    				"connectable devices.", null);
+        	return;
         }
     	// Build the foreign vector
     	ArrayList<Integer> foreignVector = new ArrayList<Integer>();
@@ -273,7 +276,8 @@ public class ConnectionService extends Service {
     			try {
     				foreignVector.add(Integer.valueOf(arrayEl));
     			} catch (NumberFormatException e) {
-    				Log.e(TAG, "Illegal post hash while trying to parse foreign vector: " + arrayEl);
+    				Util.log(Util.LOG_DEBUG, "Illegal post hash while trying to" +
+    						"parse foreign vector: " + arrayEl, e);
     			}
     		}
     	}    	
@@ -283,7 +287,7 @@ public class ConnectionService extends Service {
     	for(DataPacket post : posts) {
     		int hash = post.hashCode();
     		if(!foreignVector.contains(hash)) {
-    			toast("We are sending packet: " + post.getTitle());
+    			Util.log(Util.LOG_INFO, "We are sending packet: " + post.getTitle(), null);
     			bService.sendMessage(post.toJson());
     		}
     	}
@@ -296,7 +300,7 @@ public class ConnectionService extends Service {
 		        handler.post(new Runnable() { 
 	                public void run() { 
 	                	bService.sendMessage(Util.CLOSE_TRANSMISSION_MSG);
-	                	Log.d(TAG, "Sending out close transmission message.");
+	                	Util.log(Util.LOG_INFO, "Sending out close transmission message.", null);
 	                } 
 		        }); 
 			} 
@@ -304,7 +308,8 @@ public class ConnectionService extends Service {
     }
     
     public void closeConnection() {
-    	toast("closeConnection()");
+    	Util.log(Util.LOG_INFO, "ConnectionService is closing the " +
+    			"existing connection.", null);
     	
     	// Check that we're actually connected before trying anything
         if (bService.getState() != Util.STATE_CONNECTED) {
@@ -339,14 +344,14 @@ public class ConnectionService extends Service {
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(
                 		BluetoothDevice.EXTRA_DEVICE);
-                Log.d(TAG, "Found a device named " + device.getName() 
-                		+ ", " + device.getAddress());
+                Util.log(Util.LOG_INFO, "ConnectionService found a nearby device named " 
+                		+ device.getName(), null);
                 // Add the device to our list
                 devices.add(device);
             // Discovery has just completed
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                Log.d(TAG, "Completed discovery with a total of " 
-                		+ devices.size() + " found devices.");
+                Util.log(Util.LOG_INFO, "ConnectionService completed device discovery with a total of " 
+                		+ devices.size() + " found devices.", null);
             	// If devices were found, attempt to connect; otherwise, repeat the scan
             	if(devices.size() > 0) {
             		connect();
@@ -354,9 +359,4 @@ public class ConnectionService extends Service {
 			}
         }
     };
-    
-    private void toast(String s) {
-    	Log.d(TAG, "toasted: " + s);
-    	Util.toast(appHandler, s);
-    }
 }

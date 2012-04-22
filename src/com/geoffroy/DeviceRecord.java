@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import android.bluetooth.BluetoothDevice;
 import android.database.Cursor;
-import android.util.Log;
 
 public class DeviceRecord {
 	private long localID;
@@ -55,7 +53,6 @@ public class DeviceRecord {
 			long localID = db.insert(this, Util.DB_DEVICES);
 			this.setLocalID(localID);
 		}
-		Log.d("DR", "RECORDS: " + DeviceRecord.recordsToString(db));
 	}
 	
 	public static String recordsToString(LocalStorage db) {
@@ -116,7 +113,7 @@ public class DeviceRecord {
 			
 			if(device.getLastConnection() < 1) {
 				score = 0;
-				Log.d("DR", "Device " + deviceAddress + " has score 0");
+				//Log.d("DR", "Device " + deviceAddress + " has score 0");
 			} else {
 				timeDiff = (int)((System.currentTimeMillis() - device.getLastConnection()) / 60000);
 				double timeDiscount = -1.0 * Math.max(0, 10.0 - (Math.pow(timeDiff, 2) / 360.0));
@@ -124,20 +121,20 @@ public class DeviceRecord {
 					score = timeDiscount;
 					if(device.getFailedConn() > 10)
 						score -= 100;	// Edge heuristic for devices with no connections
-					Log.d("DR", "Device " + deviceAddress + " has time discount " + timeDiscount + " (timeDiff: " + timeDiff + "), probMsgReceived: 0, total score: " + score);
+					//Log.d("DR", "Device " + deviceAddress + " has time discount " + timeDiscount + " (timeDiff: " + timeDiff + "), probMsgReceived: 0, total score: " + score);
 				} else {
 					double probSuccessConn = 1.0 * device.getSuccessfulConn() / (device.getSuccessfulConn() + device.getFailedConn());
 					double msgsPerConn = 1.0 * Math.min(1.0, device.getMessagesReceived() / device.getSuccessfulConn());
 					double probMsgReceived = 10.0 * probSuccessConn * msgsPerConn;
 					score = probMsgReceived + timeDiscount + 1;
-					Log.d("DR", "Device " + deviceAddress + " has time discount " + timeDiscount + " (timeDiff: " + timeDiff + "), probMsgReceived: " + probMsgReceived + ", total score: " + score);
+					//Log.d("DR", "Device " + deviceAddress + " has time discount " + timeDiscount + " (timeDiff: " + timeDiff + "), probMsgReceived: " + probMsgReceived + ", total score: " + score);
 				}
 			}
 				
 			if(score > maxScore) {
 				maxScore = score;
 				maxScoreDevice = deviceAddress;
-				Log.d("DR", "Device " + deviceAddress + " has maximum score " + score);
+				//Log.d("DR", "Device " + deviceAddress + " has maximum score " + score);
 			}
 		}
 		return maxScoreDevice;

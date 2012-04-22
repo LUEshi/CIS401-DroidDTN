@@ -13,7 +13,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,9 +34,6 @@ public class MainAppScreenActivity extends ListActivity {
     LocalStorage db;
     ArrayList<DataPacket> posts = new ArrayList<DataPacket>();
     
-    // Username from settings
-    private String username;
-    
     private static final int NEW_POST_REQUEST = 0;
 	private static final int NEW_PICTURE_REQUEST = 1;
 	
@@ -57,73 +53,53 @@ public class MainAppScreenActivity extends ListActivity {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.select_post);
 	    
+	    Util.log(Util.LOG_INFO, "Starting DroidDTN.", null);
+	    
 	    db = new LocalStorage(this);
         posts = DataPacket.loadAll(db, true);
         
 		// Bind to our new adapter.
         dpArrayAdapter = new DataPacketArrayAdapter(this, posts);
         setListAdapter(dpArrayAdapter);
-        
-        // Load settings, if username doesn't exist, load model as default
-        SharedPreferences settings = getPreferences(MODE_PRIVATE);
-        username = settings.getString("username", android.os.Build.MODEL);
-        
+                
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // If the adapter is null, then Bluetooth is not supported
-//        if (mBluetoothAdapter == null) {
-//            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-//            finish();
-//            return;
-//        }
+        if (mBluetoothAdapter == null) {
+        	Util.log(Util.LOG_ERROR, "Bluetooth is not available, shutting down.", null);
+            Toast.makeText(this, "Bluetooth is not available, shutting down.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 	}
 	
 	@Override
 	public void onStart() {
-		super.onStart();
-		Log.e(TAG, "+ ON START +");
-		
+		super.onStart();		
 		// If BT is not on, request that it be enabled.
         // the connection service will then be called during onActivityResult
-//        if (!mBluetoothAdapter.isEnabled()) {
-//        	Log.d(TAG, "NO BLUETOOTH");
-//            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//            startActivityForResult(enableIntent, Util.REQUEST_ENABLE_BT);
-//        }
-//        else {	// Otherwise, setup the connection service
-//        	ensureDiscoverable();
-//        	if (cService == null) {
-//        		Intent intent = new Intent(this, ConnectionService.class);
-//        		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-//        	}
-//        }
+        if (!mBluetoothAdapter.isEnabled()) {
+        	Util.log(Util.LOG_INFO, "Bluetooth is not turned on - requesting enable.", null);
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, Util.REQUEST_ENABLE_BT);
+        }
+        else {	// Otherwise, setup the connection service
+        	ensureDiscoverable();
+        	if (cService == null) {
+        		Intent intent = new Intent(this, ConnectionService.class);
+        		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        	}
+        }
 	}
 	
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-		Log.e(TAG, "+ ON RESUME +");
 		
 		posts = DataPacket.loadAll(db, true);
 		setListAdapter(new DataPacketArrayAdapter(this,posts));
-
-		// TODO: Figure out if this code is necessary
-		/*if(cService != null) {
-			if(cService.getState() == Util.STATE_NONE)
-				cService.start();
-			else if(cService.getState() == Util.STATE_LISTEN)
-				cService.scan();
-			else
-				Toast.makeText(getApplicationContext(), "Resumed with state " + cService.getState(),
-                        Toast.LENGTH_SHORT).show();
-        } else if(cService == null) {
-        	Intent intent = new Intent(this, ConnectionService.class);
-    		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        	Log.e(TAG,"ConnectionService was found null. This should only happen" +
-        			"if this is the first time onResume() is called.");
-        }*/
 	}
 	
 	@Override
@@ -134,34 +110,33 @@ public class MainAppScreenActivity extends ListActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		Log.e(TAG, "--- ON DESTROY ---");
 		
 		// Unbind from the ConnectionService
         if (mBound) {
             unbindService(mConnection);
             mBound = false;
         }
+        
+        // Close the database
         db.close();
        
 	}
 	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
         case Util.REQUEST_ENABLE_BT:
-            // When the request to enable Bluetooth returns
+            // When the request to enable Bluetooth returns, we attempt
+        	// to bind to ConnectionService once again
             if (resultCode == Activity.RESULT_OK) {
             	ensureDiscoverable();
-            	// Bluetooth is now enabled, so set up the connection service
             	if (cService == null) {
             		Intent intent = new Intent(this, ConnectionService.class);
             		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             	}
             } else {
                 // User did not enable Bluetooth or an error occured
-                Log.d(TAG, "BT not enabled");
-                Toast.makeText(getApplicationContext(), "Bluetooth was not enabled. Leaving DroidDTN.",
-                        Toast.LENGTH_SHORT).show();
+            	Util.log(Util.LOG_ERROR, "Bluetooth was not enabled, shutting down.", null);
+                Toast.makeText(this, "Bluetooth was not enabled, shutting down.", Toast.LENGTH_LONG).show();
                 finish();
             }
         }
@@ -177,6 +152,8 @@ public class MainAppScreenActivity extends ListActivity {
             cService = binder.getService();
             mBound = true;
             cService.setAppHandler(new NetworkHandle());
+            
+            // Start the ConnectionService instance
             cService.start();
         }
 
@@ -192,8 +169,9 @@ public class MainAppScreenActivity extends ListActivity {
         public void handleMessage(Message msg) {
         	switch (msg.what) {
 	        	case Util.MESSAGE_TOAST:
-	                Toast.makeText(getApplicationContext(), msg.getData().getString(Util.TOAST),
-	                               Toast.LENGTH_SHORT).show();
+	                Toast.makeText(getApplicationContext(), 
+	                		msg.getData().getString(Util.TOAST), 
+	                		Toast.LENGTH_SHORT).show();
 	                break;
 	        	case Util.MESSAGE_FAILED_CONNECTION:
 	        		// Update the connection history of the connecting device
@@ -205,43 +183,48 @@ public class MainAppScreenActivity extends ListActivity {
 						record.setLastConnection(System.currentTimeMillis());
 						record.persist(db);
 					} catch (Exception e) {
-						Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+			        	Util.log(Util.LOG_ERROR, "Unable to encrypt the MAC " +
+			        			"address of the connecting device - no " +
+			        			"connection history will be stored.", null);
 					}
-	        		// We currently do nothing if a connection fails or is lost,
+	        		// FYI: we currently do nothing if a connection fails or is lost,
 	        		// since the service timer will get clean things up
 	        		break;
 	        	case Util.MESSAGE_READ:
-	        		/*byte[] readBuf = (byte[]) msg.obj;
-	        		if(readBuf == null)
-	        			break;
-	                // construct a string from the valid bytes in the buffer
-	                String readMessage = new String(readBuf, 0, msg.arg1);*/
 	        		String readMessage = (String) msg.obj;
-	                Log.d(TAG, "RECEIVED A MSG: " + readMessage);
+	        		// Received a comparison vector, so we should complete the handshake
 	                if(readMessage.startsWith(Util.COMPARISON_VECTOR_MSG)) {
 	                	cService.transferData(readMessage.substring(
 	                			Util.COMPARISON_VECTOR_MSG.length() + 1));
-	                } else if(readMessage.startsWith(Util.CLOSE_TRANSMISSION_MSG)) {
+	                } 
+	                // Received a close transmission message, so we should close
+	                // the connection
+	                // TODO: What if we're not done sending our messages?
+	                else if(readMessage.startsWith(Util.CLOSE_TRANSMISSION_MSG)) {
+	                	Util.log(Util.LOG_INFO, "Received a close transmission " +
+	                			"message.", null);
 	                	cService.closeConnection();
 	                } else if(readMessage.length() == 0) {
 	                	Log.e(TAG, "Received an empty post.");
-	                } else {
+	                } 
+	                // Received a real message
+	                else {
 	                	// Save the received post to data storage
 	                	DataPacket newPost;
 						try {
 							newPost = new DataPacket(readMessage);
-							
-							Log.d(TAG, "Received a message with title " 
-		                			+ newPost.getTitle() + " and body " + newPost.getContent());
+				        	Util.log(Util.LOG_INFO, "Received a message with title " 
+		                			+ newPost.getTitle() + " and body " 
+		                			+ newPost.getContent(), null);
 		            		newPost.persist(db);
 		            		
 		            		// Refresh the screen when new posts are found
-		            	    //posts = DataPacket.loadAll(db);
 		            	    dpArrayAdapter.add(newPost);
 		            		dpArrayAdapter.notifyDataSetChanged();
 						} catch (JSONException e) {
-							Log.e(TAG, "Received a post that could not be parsed: " + readMessage);
-							Log.e(TAG, e.getMessage());
+							Util.log(Util.LOG_ERROR, "Received a post that " +
+									"could not be parsed with JSON and will be " +
+									"ignored: " + readMessage, null);
 							break;
 						}
 						
@@ -253,16 +236,18 @@ public class MainAppScreenActivity extends ListActivity {
 							record.setMessagesReceived(record.getMessagesReceived() + 1);
 							record.persist(db);
 						} catch (Exception e) {
-							Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+				        	Util.log(Util.LOG_ERROR, "Unable to encrypt the MAC " +
+				        			"address of the connecting device - no " +
+				        			"connection history will be stored.", null);
 						}
 	                }
-	                Toast.makeText(getApplicationContext(), readMessage,
-                            Toast.LENGTH_LONG).show();
 	                break;
 	        	case Util.MESSAGE_CONNECTION_ESTABLISHED:
-	        		Toast.makeText(getApplicationContext(), "Connected to "
-                            + msg.getData().getString(Util.DEVICE_NAME), 
-                            Toast.LENGTH_SHORT).show();
+	        		Util.log(Util.LOG_INFO, "Connected to " + msg.getData()
+	        				.getString(Util.DEVICE_NAME), null);
+	        		Toast.makeText(getApplicationContext(), 
+	        				"Connected to " + msg.getData()
+	        				.getString(Util.DEVICE_NAME), Toast.LENGTH_LONG).show();
 	        		
 	        		// Update the connection history of the connecting device
 	        		// to reflect this successful connection attempt
@@ -273,7 +258,9 @@ public class MainAppScreenActivity extends ListActivity {
 						record.setLastConnection(System.currentTimeMillis());
 						record.persist(db);
 					} catch (Exception e) {
-						Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+						Util.log(Util.LOG_ERROR, "Unable to encrypt the MAC " +
+			        			"address of the connecting device - no " +
+			        			"connection history will be stored.", null);
 					}
 	        		
 					// Initiate a handshake
@@ -288,9 +275,9 @@ public class MainAppScreenActivity extends ListActivity {
     };
     
     private void ensureDiscoverable() {
-        Log.d(TAG, "ensure discoverable");
         if (mBluetoothAdapter.getScanMode() !=
             BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+        	Util.log(Util.LOG_INFO, "Requesting that device be discoverable.", null);
             Intent discoverableIntent = new Intent(
             		BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(
@@ -319,6 +306,10 @@ public class MainAppScreenActivity extends ListActivity {
 	        	i = new Intent(this, HelpScreenActivity.class);
 				startActivity(i);
 				return true;
+		    case R.id.logs:
+	        	i = new Intent(this, LogsScreenActivity.class);
+				startActivity(i);
+				return true;
 	        case R.id.settings:
 	        	i = new Intent(this, SettingsActivity.class);
 				startActivity(i);
@@ -326,11 +317,7 @@ public class MainAppScreenActivity extends ListActivity {
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
-	}
-	
-	// Reload posts
-	public void update(){ posts = DataPacket.loadAll(db, true); }
-	
+	}	
 	
 	@Override  
 	protected void onListItemClick(ListView l, View v, int position, long id) {  
@@ -338,6 +325,7 @@ public class MainAppScreenActivity extends ListActivity {
 	  clickOnPost(posts.get(position));
 	  
 	}  
+	
 	// To be called when a packet is clicked.
 	// Creates a new ViewPostActivity with dp's fields as parameters (might be clunky?)
 	public void clickOnPost(DataPacket dp){
@@ -362,9 +350,4 @@ public class MainAppScreenActivity extends ListActivity {
 		Intent i = new Intent(this, NewPictureActivity.class);       
         startActivityForResult(i, NEW_PICTURE_REQUEST);
 	}
-	
-	// GETTERS
-	public ArrayList<DataPacket> getPosts(){  return posts; }
-	public LocalStorage getDB(){ return db; }
-
 }

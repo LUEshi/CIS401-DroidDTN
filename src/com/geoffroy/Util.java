@@ -1,8 +1,13 @@
 package com.geoffroy;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 public class Util {
 	// Spam score threshold
@@ -48,6 +53,27 @@ public class Util {
     
     public static final String DB_PACKETS = "db_packets";
     public static final String DB_DEVICES = "db_devices";
+    
+    public static ArrayList<String> LOG_ENTRIES = new ArrayList<String>();
+    public static boolean DEBUG = false;
+    public static final String LOG_ERROR = "ERROR";
+    public static final String LOG_INFO = "INFO";
+    public static final String LOG_DEBUG = "DEBUG";
+    
+    public static void log(String type, String log, Throwable e) {
+		SimpleDateFormat sdf = new SimpleDateFormat("H:m:s");
+		String time = sdf.format(System.currentTimeMillis());
+
+    	if(!type.equals(LOG_DEBUG))
+			LOG_ENTRIES.add(time + " - " + type + ": " + log);
+    	
+    	if(type.equals(LOG_ERROR))
+    		Log.e("", log, e);
+    	else if(type.equals(LOG_INFO))
+    		Log.i("", log, e);
+    	else if(type.equals(LOG_DEBUG))
+    		Log.d("", log, e);
+    }
     
     public static void toast(Handler h, String s) {
     	// Send a message back to the Activity

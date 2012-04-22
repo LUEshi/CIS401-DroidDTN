@@ -37,6 +37,7 @@
 	    </activity>
 	    <activity android:name="AboutScreenActivity" />
 	    <activity android:name="HelpScreenActivity" />
+	    <activity android:name="LogsScreenActivity" />
 	    <activity android:name="MainMenuActivity" />
    	    <activity android:name="NewPictureActivity" />
 	   	<activity android:name="NewPostActivity" />

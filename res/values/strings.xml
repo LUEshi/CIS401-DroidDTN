@@ -42,6 +42,7 @@
     <!-- misc -->
     <string name="about">About</string>
     <string name="help">Help</string>
+    <string name="logs">App Logs</string>
     <string name="select_post">Select a Post</string>
     <string name="new_post">Add a Post</string>
     <string name="settings">Settings</string>
