@@ -1,6 +1,7 @@
 package com.geoffroy;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -125,5 +126,17 @@ public class DataPacket {
 			}
 		}
 		return missingPosts;
+	}
+	
+	public static String packetsToString(LocalStorage db) {
+		ArrayList<DataPacket> packets = loadAll(db);
+        String s = "";
+        DataPacket packet;
+        Iterator<DataPacket> i = packets.iterator();
+        while(i.hasNext()) {
+        	packet = i.next();
+        	s += "localID: " + packet.getLocalID() + " author: " + packet.getAuthor() + " title: " + packet.getTitle() + " content: " + packet.getContent() + " type: " + packet.getType() + "\n";
+        }
+        return s;
 	}
 }

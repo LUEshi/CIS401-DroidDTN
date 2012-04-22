@@ -1,5 +1,7 @@
 package com.geoffroy;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -99,7 +101,7 @@ public class ConnectionService extends Service {
         // Load the database
         db = new LocalStorage(this);
         posts = DataPacket.loadAll(db);
-  	}
+   	}
 	
 	@Override
 	public void onDestroy() {
@@ -175,25 +177,42 @@ public class ConnectionService extends Service {
     
     /**
      * Connects with an available device.
-     * 
-     * TODO: There is currently no logic dictating which device we decide
-     * to pair with. This could instead be based on history, for instance.
-     * Even worse, what if the pairing fails, we re-scan, and try to pair
-     * with the same device again (unsuccessfully) when there were others
-     * for us to try.
      */
     public void connect() {
     	toast("connect()");
 
-    	// Make sure there are actually devices to connect to, or return to scan
+    	// Make sure there are actually devices to connect to, or exit
     	if(devices.size() < 1) {
     		Log.e(TAG, "We're attempting to connect but there are no connectable devices...");
-    		scan();
     		return;
     	}
+    	
+    	List<String> deviceAddresses = new ArrayList<String>();
+    	Iterator<BluetoothDevice> i = devices.iterator();
+    	while(i.hasNext()) {
+    		BluetoothDevice d = i.next();
+    		deviceAddresses.add(d.getAddress());
+    	}
+    	
+    	String connDeviceAddress;
+		try {
+			connDeviceAddress = DeviceRecord.selectBestDevice(deviceAddresses, db);
+		} catch (Exception e) {
+			Log.d(TAG, "Unable to encrypt the MAC address for the connecting device.");
+			connDeviceAddress = devices.get(0).getAddress();
+		}
+    	BluetoothDevice connDevice = mBtAdapter.getRemoteDevice(connDeviceAddress);
+    	if(connDevice != null) {
+    		// Cancel discovery because it's costly and we're about to connect
+            mBtAdapter.cancelDiscovery();
+
+            // Connect to the found device
+			bService.connect(connDevice);
+    	}
+    	
     	// TODO: Change the following logic, which currently hard-codes the
     	// MAC address of our test phone
-    	Iterator<BluetoothDevice> i = devices.iterator();
+    	/*Iterator<BluetoothDevice> i = devices.iterator();
     	while(i.hasNext()) {
     		BluetoothDevice d = i.next();
     		if(d.getAddress().equals("3C:5A:37:87:6E:F2") // Nexus S
@@ -207,7 +226,7 @@ public class ConnectionService extends Service {
     			bService.connect(d);
     			return;
     		}
-    	}
+    	}*/
     }
     
     /**
@@ -221,6 +240,7 @@ public class ConnectionService extends Service {
         	toast("You are not connected to a device and cannot perform a handshake.");
             return;
         }
+        
     	// Get the local blog comparison vector and package it to a string
     	ArrayList<Integer> localVector = DataPacket.getBlogComparisonVector(db);
     	String msg = Util.COMPARISON_VECTOR_MSG + " " + TextUtils.join(";", localVector);
@@ -276,7 +296,6 @@ public class ConnectionService extends Service {
     	
     	// Check that we're actually connected before trying anything
         if (bService.getState() != Util.STATE_CONNECTED) {
-        	toast("You are not connected to a device and cannot disconnect.");
             return;
         }
         

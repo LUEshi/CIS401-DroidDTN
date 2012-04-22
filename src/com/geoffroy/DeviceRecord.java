@@ -1,14 +1,14 @@
 package com.geoffroy;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 
 import android.bluetooth.BluetoothDevice;
 import android.database.Cursor;
+import android.util.Log;
 
 public class DeviceRecord {
 	private long localID;
@@ -49,12 +49,39 @@ public class DeviceRecord {
 	public void setSpamScore(int spamScore) { this.spamScore = spamScore; }
 
 	public void persist(LocalStorage db) {
-		if(localID > 0)
+		if(localID > 0) {
 			db.update(this, Util.DB_DEVICES);
-		else {
+		} else {
 			long localID = db.insert(this, Util.DB_DEVICES);
 			this.setLocalID(localID);
 		}
+		Log.d("DR", "RECORDS: " + DeviceRecord.recordsToString(db));
+	}
+	
+	public static String recordsToString(LocalStorage db) {
+		ArrayList<DeviceRecord> records = loadAll(db);
+        String s = "";
+        DeviceRecord record;
+        Iterator<DeviceRecord> i = records.iterator();
+        while(i.hasNext()) {
+        	record = i.next();
+        	s += "localID: " + record.getLocalID() + " address: " + record.getAddress() + " last conn: " + record.getLastConnection() + " failed: " + record.getFailedConn() + " success: " + record.getSuccessfulConn() + " messages: " + record.getMessagesReceived() + "\n";
+        }
+        return s;
+	}
+	
+	public static DeviceRecord load(String address, LocalStorage db) {
+		ArrayList<DeviceRecord> records = loadAll(db);
+		DeviceRecord record;
+		
+		Iterator<DeviceRecord> i = records.iterator();
+		while(i.hasNext()) {
+			record = i.next();
+			if(record.getAddress().equals(address)) {
+				return record;
+			}
+		}
+		return new DeviceRecord(address, 0, 0, 0, 0, 0);
 	}
 	
 	public static ArrayList<DeviceRecord> loadAll(LocalStorage db) {
@@ -75,12 +102,44 @@ public class DeviceRecord {
 		return records;
 	}
 	
-	public static BluetoothDevice selectBestDevice(List<BluetoothDevice> devices) {
-		/*
-		 * (int)min(10, (1/10) lastConnection.hours ^ 2)
-		 * + max(10, messagesReceived / successfulConn)
-		 * - max(10, 2 * failedConn)
-		 */
-		return null;
+	public static String selectBestDevice(List<String> devices, LocalStorage db) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		Iterator<String> i = devices.iterator();
+		DeviceRecord device;
+		String deviceAddress = "";
+		double maxScore = -1000;
+		String maxScoreDevice = "";
+		double score;
+		int timeDiff;
+		while(i.hasNext()) {
+			deviceAddress = i.next();
+			device = load(Encryption.encrypt(deviceAddress), db);
+			
+			if(device.getLastConnection() < 1) {
+				score = 0;
+				Log.d("DR", "Device " + deviceAddress + " has score 0");
+			} else {
+				timeDiff = (int)((System.currentTimeMillis() - device.getLastConnection()) / 60000);
+				double timeDiscount = -1.0 * Math.max(0, 10.0 - (Math.pow(timeDiff, 2) / 360.0));
+				if(device.getSuccessfulConn() < 1) {
+					score = timeDiscount;
+					if(device.getFailedConn() > 10)
+						score -= 100;	// Edge heuristic for devices with no connections
+					Log.d("DR", "Device " + deviceAddress + " has time discount " + timeDiscount + " (timeDiff: " + timeDiff + "), probMsgReceived: 0, total score: " + score);
+				} else {
+					double probSuccessConn = 1.0 * device.getSuccessfulConn() / (device.getSuccessfulConn() + device.getFailedConn());
+					double msgsPerConn = 1.0 * Math.min(1.0, device.getMessagesReceived() / device.getSuccessfulConn());
+					double probMsgReceived = 10.0 * probSuccessConn * msgsPerConn;
+					score = probMsgReceived + timeDiscount + 1;
+					Log.d("DR", "Device " + deviceAddress + " has time discount " + timeDiscount + " (timeDiff: " + timeDiff + "), probMsgReceived: " + probMsgReceived + ", total score: " + score);
+				}
+			}
+				
+			if(score > maxScore) {
+				maxScore = score;
+				maxScoreDevice = deviceAddress;
+				Log.d("DR", "Device " + deviceAddress + " has maximum score " + score);
+			}
+		}
+		return maxScoreDevice;
 	}
 }

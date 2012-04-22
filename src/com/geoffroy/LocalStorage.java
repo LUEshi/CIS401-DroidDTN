@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class LocalStorage {
 	
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 5;
 	private static final String DATABASE_NAME = "droid_dtn.db";
 	private static final String TABLE_PACKETS = "packets";
 	private static final String TABLE_DEVICES = "devices";
@@ -26,7 +26,16 @@ public class LocalStorage {
 		this.db = openHelper.getWritableDatabase();
 	}
 	
+	private void checkOpenDB() {
+		if(!db.isOpen()) {
+			OpenHelper openHelper = new OpenHelper(this.context);
+			db = openHelper.getWritableDatabase();
+		}
+	}
+	
 	public long insert(Object data, String table) {
+		checkOpenDB();
+		
 		ContentValues values = new ContentValues();
 		
 		if(table == Util.DB_PACKETS) {
@@ -52,6 +61,8 @@ public class LocalStorage {
 	}
 	
 	public boolean delete(long ID, String table) {
+		checkOpenDB();
+		
 		if(table == Util.DB_PACKETS)
 			return db.delete(TABLE_PACKETS, "localID" + "=" + ID, null) > 0;
 		else if(table == Util.DB_DEVICES)
@@ -61,6 +72,8 @@ public class LocalStorage {
 	}
 	
 	public boolean update(Object data, String table) {
+		checkOpenDB();
+		
 		ContentValues values = new ContentValues();
 		
 		if(table == Util.DB_PACKETS) {
@@ -86,6 +99,8 @@ public class LocalStorage {
 	}
 	
 	public Cursor get(long ID, String table) throws SQLException {
+		checkOpenDB();
+		
 		Cursor mCursor;
 		
 		if(table == Util.DB_PACKETS) {
@@ -107,6 +122,8 @@ public class LocalStorage {
 	}
 	
 	public Map<String,String> getPostMap(long ID, String table) throws SQLException {
+		checkOpenDB();
+		
 		Cursor mCursor = null;
 		
 		if(table == Util.DB_PACKETS) {
@@ -152,6 +169,8 @@ public class LocalStorage {
 
 	
 	public Cursor getAll(String table) throws SQLException {
+		checkOpenDB();
+		
 		if(table == Util.DB_PACKETS) {
 			return db.query(TABLE_PACKETS, 
 					new String[] {"localID", "created", "author", "title", "content", "type"}, 
@@ -176,16 +195,16 @@ public class LocalStorage {
 		@Override
       	public void onCreate(SQLiteDatabase db) {
 			db.execSQL("CREATE TABLE " + TABLE_PACKETS + " (" +
-					"localID INTEGER, " + 
+					"localID INTEGER PRIMARY KEY, " + 
 	    			"created INTEGER, " +
 	    			"author TEXT, " +
 	    			"title TEXT, " +
 	    			"content TEXT, " +
 	    			"type TEXT);");
 			db.execSQL("CREATE TABLE " + TABLE_DEVICES + " (" +
-					"localID INTEGER, " + 
+					"localID INTEGER PRIMARY KEY, " + 
 	    			"address TEXT, " +
-	    			"created INTEGER, " +
+	    			"lastConnection INTEGER, " +
 	    			"messagesReceived INTEGER, " +
 	    			"successfulConn INTEGER, " +
 	    			"failedConn INTEGER, " +
