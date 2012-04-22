@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class LocalStorage {
 	
 
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 6;
 	private static final String DATABASE_NAME = "droid_dtn.db";
 	private static final String TABLE_PACKETS = "packets";
 	private static final String TABLE_DEVICES = "devices";

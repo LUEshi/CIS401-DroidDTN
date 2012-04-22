@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.app.Activity;
@@ -38,6 +39,7 @@ public class ViewPostActivity extends Activity {
 	    ls = new LocalStorage(this);
 	    dp = ls.getDataPacket(localID);
 	    title=dp.getTitle();
+	    created = dp.getCreated();
 	    author=dp.getAuthor();
 	    content=dp.getContent();
 	    type=dp.getType();
@@ -83,7 +85,7 @@ public class ViewPostActivity extends Activity {
 		return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 	}
 	
-	public void markAsSpam(){
+	public void markAsSpam(View v){
 		dp.setSpamScore(spamScore+1);
 		dp.setIsVisible(false);
 		dp.persist(ls);
