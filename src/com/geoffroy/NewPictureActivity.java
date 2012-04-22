@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 public class NewPictureActivity extends Activity {
@@ -88,6 +89,9 @@ public class NewPictureActivity extends Activity {
 			if (requestCode == SELECT_PICTURE) {
 				Uri selectedImageUri = data.getData();
 				selectedImagePath = getPath(selectedImageUri);
+				ImageView v = (ImageView) findViewById(R.id.img);
+				Bitmap bm = BitmapFactory.decodeFile(selectedImagePath);
+				v.setImageBitmap(bm);
 			}
 		}
 	}
