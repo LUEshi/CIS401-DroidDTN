@@ -301,11 +301,6 @@ public class MainAppScreenActivity extends ListActivity {
 		Bundle bun = new Bundle();
 
 		bun.putLong("localID", dp.getLocalID());
-		bun.putLong("created", dp.getCreated());
-		bun.putString("author", dp.getAuthor());
-		bun.putString("title", dp.getTitle());
-		bun.putString("content", dp.getContent());
-		bun.putString("type", dp.getType());
 
 		intent.setClass(this, ViewPostActivity.class);
 		intent.putExtras(bun);

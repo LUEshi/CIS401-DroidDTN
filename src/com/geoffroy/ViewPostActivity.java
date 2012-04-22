@@ -4,6 +4,7 @@ package com.geoffroy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -28,12 +29,13 @@ public class ViewPostActivity extends Activity {
 	
 	    Bundle bun = getIntent().getExtras();
 	    localID = bun.getLong("localID");
-	    created = bun.getLong("created");
-		author = bun.getString("author");
-		title = bun.getString("title");
-		content = bun.getString("content");
-		type = bun.getString("type");
-		
+
+	    LocalStorage ls = new LocalStorage(this);
+	    DataPacket dp = ls.getDataPacket(localID);
+	    title=dp.getTitle();
+	    author=dp.getAuthor();
+	    content=dp.getContent();
+	    type=dp.getType();
 		//initialize view
 		setContentView(R.layout.view_post);
 		
@@ -47,9 +49,15 @@ public class ViewPostActivity extends Activity {
 		SimpleDateFormat sdf = new SimpleDateFormat("E MMM d, K:m a");
 		temp.setText(" " + sdf.format(new Date(created)));
 		
-		temp=(TextView)this.findViewById(com.geoffroy.R.id.view_message);
-		temp.setText(content);
 		
+		if(type.equals(Util.POST_TYPE_IMAGE)){
+			ImageView temp2=(ImageView)this.findViewById(com.geoffroy.R.id.view_picture);
+			temp2.setImageBitmap(this.decodeString(content));
+		}
+		else{
+			temp=(TextView)this.findViewById(com.geoffroy.R.id.view_message);
+			temp.setText(content);
+		}
 		
 	}
 	

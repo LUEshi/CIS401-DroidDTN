@@ -18,6 +18,15 @@ public class DataPacket {
 	/*
 	 * Default constructor
 	 */
+	public DataPacket() {
+		this.localID = 0;
+		this.created = 0;
+		this.author = "";
+		this.title = "";
+		this.content = "";
+		this.type = "";
+	}
+	
 	public DataPacket(String author, String title, String content, String type) {
 		this.localID = 0;
 		this.created = System.currentTimeMillis();

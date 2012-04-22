@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class LocalStorage {
 	
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	private static final String DATABASE_NAME = "blog.db";
 	private static final String TABLE_NAME = "posts";
 	
@@ -58,6 +58,24 @@ public class LocalStorage {
 			mCursor.moveToFirst();
 		}
 		return mCursor;
+	}
+	
+	public DataPacket getDataPacket(long ID) throws SQLException{
+		Cursor mCursor = db.query(true, TABLE_NAME, 
+				new String[] {"localID", "created", "author", "title", "content", "type"}, 
+				"localID" + "=" + ID, null, null, null, null, null);
+	
+		if(mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		DataPacket d = new DataPacket();
+		d.setLocalID(ID);
+		d.setCreated(mCursor.getLong(mCursor.getColumnIndex("created")));
+		d.setAuthor(mCursor.getString(mCursor.getColumnIndex("author")));
+		d.setTitle(mCursor.getString(mCursor.getColumnIndex("title")));
+		d.setContent(mCursor.getString(mCursor.getColumnIndex("content")));
+		d.setType(mCursor.getString(mCursor.getColumnIndex("type")));
+		return d;
 	}
 	
 	//TODO: is that the correct number of nulls?
