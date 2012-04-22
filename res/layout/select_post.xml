@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal" >
-
+
         <Button
             android:id="@+id/Button01"
             android:layout_width="wrap_content"
@@ -52,7 +52,11 @@
             android:text="New Picture" />
 
     </LinearLayout>
-
-
+        
+    <ImageView
+		    android:src="@drawable/full_logo"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+ 			android:contentDescription="Logo"/>
 
 </LinearLayout>

@@ -4,12 +4,12 @@
     android:layout_width="fill_parent"
     android:layout_height="60dp"
     android:orientation="horizontal" android:layout_gravity="fill_vertical">
-    <ImageView
+    <!-- <ImageView
         android:id="@+id/imageViewEmployer"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_margin="5dp"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/ic_launcher" /> -->
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
