@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -78,7 +79,8 @@ public class NewPictureActivity extends Activity {
 	    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream); 
 	    byte[] byteArray = outputStream.toByteArray();
-	    return new String(byteArray, "UTF-8");
+	    Base64.encodeToString(byteArray, Base64.DEFAULT);
+	    return Base64.encodeToString(byteArray, Base64.DEFAULT);
 	}
 	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {

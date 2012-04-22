@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -61,11 +62,10 @@ public class ViewPostActivity extends Activity {
 		
 		
 		if(type.equals(Util.POST_TYPE_IMAGE)){
-			/*ImageView temp2=(ImageView)this.findViewById(com.geoffroy.R.id.view_picture);
-			Bitmap b = BitmapFactory.decodeFile("/mnt/sdcard/media/images/2.bmp");
-			Bitmap b2 = decodeString(content);
+			ImageView temp2=(ImageView)this.findViewById(com.geoffroy.R.id.view_picture);
+			Bitmap b = decodeString(content);
 			
-			temp2.setImageBitmap(b);*/
+			temp2.setImageBitmap(b);
 		}
 		else{
 			temp=(TextView)this.findViewById(com.geoffroy.R.id.view_message);
@@ -75,13 +75,8 @@ public class ViewPostActivity extends Activity {
 	}
 	
 	public Bitmap decodeString(String content){
-		byte[] byteArray=null;
-		try {
-			byteArray = content.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		byte[] byteArray = Base64.decode(content, Base64.DEFAULT);
+
 		return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 	}
 	
