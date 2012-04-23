@@ -47,7 +47,7 @@ public class Bluetooth {
 
     // Member fields
     private final BluetoothAdapter mAdapter;
-    private Handler appHandler;
+    private Handler internalHandler;
     private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
@@ -58,13 +58,10 @@ public class Bluetooth {
      * STATE_NONE, and mHandler is passed from ConnectionService later.
      * @param context  The UI Activity Context
      */
-    public Bluetooth(Context context) {
+    public Bluetooth(Context context, Handler h) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = Util.STATE_NONE;
-    }
-    
-    public void setHandler(Handler h) {
-    	this.appHandler = h;
+        internalHandler = h;
     }
 
     /**
@@ -77,7 +74,8 @@ public class Bluetooth {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        appHandler.obtainMessage(Util.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        internalHandler.obtainMessage(Util.MESSAGE_STATE_CHANGE, state, -1)
+        		.sendToTarget();
     }
 
     /**
@@ -150,12 +148,13 @@ public class Bluetooth {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = appHandler.obtainMessage(Util.MESSAGE_CONNECTION_ESTABLISHED);
+        Message msg = internalHandler.obtainMessage(
+        		Util.MESSAGE_CONNECTION_ESTABLISHED);
         Bundle bundle = new Bundle();
         bundle.putString(Util.DEVICE_ADDRESS, device.getAddress());
         bundle.putString(Util.DEVICE_NAME, device.getName());
         msg.setData(bundle);
-        appHandler.sendMessage(msg);
+        internalHandler.sendMessage(msg);
 
         setState(Util.STATE_CONNECTED);
     }
@@ -218,11 +217,11 @@ public class Bluetooth {
         setState(Util.STATE_LISTEN);
 
         // Send a failure message back to the Activity        
-        Message msg = appHandler.obtainMessage(Util.MESSAGE_FAILED_CONNECTION);
+        Message msg = internalHandler.obtainMessage(Util.MESSAGE_FAILED_CONNECTION);
         Bundle bundle = new Bundle();
         bundle.putString(Util.DEVICE_ADDRESS, device);
         msg.setData(bundle);
-        appHandler.sendMessage(msg);
+        internalHandler.sendMessage(msg);
         
         String s = "";
         StackTraceElement[] st = e.getStackTrace();
@@ -240,7 +239,8 @@ public class Bluetooth {
         setState(Util.STATE_LISTEN);
 
         // Send a failure message back to the Activity
-        appHandler.obtainMessage(Util.MESSAGE_LOST_CONNECTION, -1, -1).sendToTarget();
+        internalHandler.obtainMessage(
+        		Util.MESSAGE_LOST_CONNECTION, -1, -1).sendToTarget();
     	Util.log(Util.LOG_INFO, "A device connection was shut down.", e);        
     }
 
@@ -258,7 +258,7 @@ public class Bluetooth {
 
             // Create a new listening server socket
             try {
-                tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME, MY_UUID);
+                tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
             } catch (IOException e) {
             	Util.log(Util.LOG_DEBUG, "Bluetooth AcceptThread listen() failed.", e);        
             }
@@ -332,7 +332,7 @@ public class Bluetooth {
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
-                tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
+                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
             } catch (Exception e) {
             	Util.log(Util.LOG_DEBUG, "Bluetooth ConnectThread create() failed.", e);        
 			}
@@ -424,12 +424,13 @@ public class Bluetooth {
             		if(msgString.indexOf("</msg>") > -1) {
             			msgString = msgString.replaceFirst("<msg>", "");
             			msgString = msgString.replaceFirst("</msg>", "");
-            			Message msg = appHandler.obtainMessage(Util.MESSAGE_READ, -1, -1, msgString);
+            			Message msg = internalHandler.obtainMessage(
+            					Util.MESSAGE_READ, -1, -1, msgString);
                         Bundle bundle = new Bundle();
                         bundle.putString(Util.DEVICE_ADDRESS, 
                         		mmSocket.getRemoteDevice().getAddress());
                         msg.setData(bundle);
-                        appHandler.sendMessage(msg);
+                        internalHandler.sendMessage(msg);
                         
                         msgString = "";
             		}
@@ -450,7 +451,7 @@ public class Bluetooth {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                appHandler.obtainMessage(Util.MESSAGE_WRITE, -1, -1, buffer)
+                internalHandler.obtainMessage(Util.MESSAGE_WRITE, -1, -1, buffer)
                         .sendToTarget();
             } catch (IOException e) {
             	Util.log(Util.LOG_DEBUG, "An exception occured during write() in ConnectedThread", e);        

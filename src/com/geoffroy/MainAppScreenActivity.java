@@ -2,8 +2,6 @@ package com.geoffroy;
 
 import java.util.ArrayList;
 
-import org.json.JSONException;
-
 import com.geoffroy.ConnectionService.LocalBinder;
 
 import android.app.Activity;
@@ -17,7 +15,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,9 +23,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class MainAppScreenActivity extends ListActivity {
-	
-	// Debugging
-    private static final String TAG = "DroidDTN - MainAppScreenActivity";
    
 	/* Database helper class */
     LocalStorage db;
@@ -163,109 +157,23 @@ public class MainAppScreenActivity extends ListActivity {
         }
     };
 		
-    // The Handler that gets information back from the BluetoothChatService
+    // The Handler that gets information back from the ConnectionService instance
     class NetworkHandle extends Handler {
         @Override
         public void handleMessage(Message msg) {
         	switch (msg.what) {
+        		// Display toasts sent by other application components
 	        	case Util.MESSAGE_TOAST:
 	                Toast.makeText(getApplicationContext(), 
 	                		msg.getData().getString(Util.TOAST), 
 	                		Toast.LENGTH_SHORT).show();
 	                break;
-	        	case Util.MESSAGE_FAILED_CONNECTION:
-	        		// Update the connection history of the connecting device
-	        		// to reflect this failed connection attempt
-	                try {
-						DeviceRecord record = DeviceRecord.load(
-								Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
-						record.setFailedConn(record.getFailedConn() + 1);
-						record.setLastConnection(System.currentTimeMillis());
-						record.persist(db);
-					} catch (Exception e) {
-			        	Util.log(Util.LOG_ERROR, "Unable to encrypt the MAC " +
-			        			"address of the connecting device - no " +
-			        			"connection history will be stored.", null);
-					}
-	        		// FYI: we currently do nothing if a connection fails or is lost,
-	        		// since the service timer will get clean things up
-	        		break;
+	            // When a new message is received, update the UI
 	        	case Util.MESSAGE_READ:
-	        		String readMessage = (String) msg.obj;
-	        		// Received a comparison vector, so we should complete the handshake
-	                if(readMessage.startsWith(Util.COMPARISON_VECTOR_MSG)) {
-	                	cService.transferData(readMessage.substring(
-	                			Util.COMPARISON_VECTOR_MSG.length() + 1));
-	                } 
-	                // Received a close transmission message, so we should close
-	                // the connection
-	                // TODO: What if we're not done sending our messages?
-	                else if(readMessage.startsWith(Util.CLOSE_TRANSMISSION_MSG)) {
-	                	Util.log(Util.LOG_INFO, "Received a close transmission " +
-	                			"message.", null);
-	                	cService.closeConnection();
-	                } else if(readMessage.length() == 0) {
-	                	Log.e(TAG, "Received an empty post.");
-	                } 
-	                // Received a real message
-	                else {
-	                	// Save the received post to data storage
-	                	DataPacket newPost;
-						try {
-							newPost = new DataPacket(readMessage);
-				        	Util.log(Util.LOG_INFO, "Received a message with title " 
-		                			+ newPost.getTitle() + " and body " 
-		                			+ newPost.getContent(), null);
-		            		newPost.persist(db);
-		            		
-		            		// Refresh the screen when new posts are found
-		            	    dpArrayAdapter.add(newPost);
-		            		dpArrayAdapter.notifyDataSetChanged();
-						} catch (JSONException e) {
-							Util.log(Util.LOG_ERROR, "Received a post that " +
-									"could not be parsed with JSON and will be " +
-									"ignored: " + readMessage, null);
-							break;
-						}
-						
-						// Update the connection history of the connecting device
-		        		// to reflect this received message
-		                try {
-							DeviceRecord record = DeviceRecord.load(
-									Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
-							record.setMessagesReceived(record.getMessagesReceived() + 1);
-							record.persist(db);
-						} catch (Exception e) {
-				        	Util.log(Util.LOG_ERROR, "Unable to encrypt the MAC " +
-				        			"address of the connecting device - no " +
-				        			"connection history will be stored.", null);
-						}
-	                }
+	        		DataPacket newPost = (DataPacket) msg.obj;
+            	    dpArrayAdapter.add(newPost);
+            		dpArrayAdapter.notifyDataSetChanged();
 	                break;
-	        	case Util.MESSAGE_CONNECTION_ESTABLISHED:
-	        		Util.log(Util.LOG_INFO, "Connected to " + msg.getData()
-	        				.getString(Util.DEVICE_NAME), null);
-	        		Toast.makeText(getApplicationContext(), 
-	        				"Connected to " + msg.getData()
-	        				.getString(Util.DEVICE_NAME), Toast.LENGTH_LONG).show();
-	        		
-	        		// Update the connection history of the connecting device
-	        		// to reflect this successful connection attempt
-	                try {
-						DeviceRecord record = DeviceRecord.load(
-								Encryption.encrypt(msg.getData().getString(Util.DEVICE_ADDRESS)), db);
-						record.setSuccessfulConn(record.getSuccessfulConn() + 1);
-						record.setLastConnection(System.currentTimeMillis());
-						record.persist(db);
-					} catch (Exception e) {
-						Util.log(Util.LOG_ERROR, "Unable to encrypt the MAC " +
-			        			"address of the connecting device - no " +
-			        			"connection history will be stored.", null);
-					}
-	        		
-					// Initiate a handshake
-					cService.handshake();
-	        		break;
 	        	case Util.MESSAGE_REQUEST_DISCOVERABLE:
 	        		ensureDiscoverable();
 	        		break;
